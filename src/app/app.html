@@ -1,0 +1,97 @@
+<div class="page-shell">
+  <app-site-header
+    [businessName]="config.name"
+    [itemCount]="cart.itemCount()"
+    (openCart)="cartOpen.set(true)"
+    (viewDrinks)="viewDrinks()"
+  />
+  <app-hero (viewMenu)="scrollToMenu()" />
+
+  <main id="carta" tabindex="-1">
+    <div class="menu-shell">
+      <div class="menu-heading">
+        <div>
+          <p class="eyebrow">LA CARTA <span></span> LA ESTACIÓN 365</p>
+          <h2>Un gusto para<br><em>cada antojo.</em></h2>
+        </div>
+        <div class="menu-heading-note">
+          <span class="sun-symbol" aria-hidden="true">✳</span>
+          <p>Marinos, criollos, caldos y más. Elige tus favoritos y arma tu pedido.</p>
+          <small>Fotos referenciales en los platos que las incluyen</small>
+        </div>
+      </div>
+
+      <div class="menu-controls">
+        <label class="search-box">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
+          <span class="visually-hidden">Buscar productos en la carta</span>
+          <input type="search" placeholder="¿Qué se te antoja?" [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)" autocomplete="off">
+        </label>
+        <nav class="categories" aria-label="Categorías de la carta">
+          <button type="button" [class.active]="activeCategory() === 'all'" [attr.aria-pressed]="activeCategory() === 'all'" (click)="selectCategory('all')">Toda la carta</button>
+          @for (category of categories; track category.id) {
+            <button type="button" [class.active]="activeCategory() === category.id" [attr.aria-pressed]="activeCategory() === category.id" (click)="selectCategory(category.id)">{{ category.shortName }}</button>
+          }
+        </nav>
+      </div>
+
+      <div class="result-summary" role="status" aria-live="polite">
+        <span>{{ filteredProducts().length }} {{ filteredProducts().length === 1 ? 'opción' : 'opciones' }} para elegir</span>
+        @if (searchTerm().trim()) { <button type="button" (click)="searchTerm.set('')">Limpiar búsqueda <span aria-hidden="true">×</span></button> }
+      </div>
+
+      @if (filteredProducts().length) {
+        <div class="category-list">
+          @for (group of groupedProducts(); track group.id; let i = $index) {
+            <section class="category-section" [id]="'categoria-' + group.id" [attr.aria-labelledby]="'title-' + group.id">
+              <div class="category-heading">
+                <span class="category-index">{{ (i + 1).toString().padStart(2, '0') }}</span>
+                <div class="category-title"><h3 [id]="'title-' + group.id">{{ group.name }}</h3><p>{{ group.description }}</p></div>
+                <span class="category-count">{{ group.products.length }} {{ group.products.length === 1 ? 'opción' : 'opciones' }}</span>
+              </div>
+              <div class="product-grid">
+                @for (product of group.products; track product.id) {
+                  <app-product-card [product]="product" [quantity]="quantities().get(product.id) ?? 0" (added)="addProduct($event)" (decreased)="decreaseProduct($event)" />
+                }
+              </div>
+            </section>
+          }
+        </div>
+      } @else {
+        <div class="no-results">
+          <span aria-hidden="true">⌁</span>
+          <h3>No encontramos ese plato</h3>
+          <p>Prueba con otra palabra o revisa la carta completa.</p>
+          <button type="button" (click)="searchTerm.set(''); selectCategory('all')">Ver toda la carta</button>
+        </div>
+      }
+    </div>
+
+    <section class="order-guide" aria-labelledby="guide-title">
+      <div class="guide-intro"><p>HECHO PARA PEDIR FÁCIL</p><h2 id="guide-title">Del antojo<br><em>al primer bocado.</em></h2></div>
+      <ol>
+        <li><span>01</span><strong>Elige tus platos</strong><p>Explora la carta y ajusta las cantidades.</p></li>
+        <li><span>02</span><strong>Hazlo a tu gusto</strong><p>Agrega indicaciones como “sin picante”.</p></li>
+        <li><span>03</span><strong>Envíalo por WhatsApp</strong><p>Revisa tu pedido y envía el mensaje tú mismo.</p></li>
+      </ol>
+      @if (cart.itemCount()) { <button type="button" (click)="cartOpen.set(true)">Revisar mi pedido <span aria-hidden="true">↗</span></button> }
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-main"><strong>{{ config.name }}</strong><p>{{ config.tagline }}</p></div>
+    <div class="footer-contact"><span>PEDIDOS POR WHATSAPP</span><a [href]="'https://wa.me/' + config.whatsapp" target="_blank" rel="noopener noreferrer">{{ config.displayWhatsapp }} <span aria-hidden="true">↗</span></a></div>
+    <p class="footer-note">Precios en soles. Delivery gratis; confirma la cobertura y disponibilidad por WhatsApp. Consulta los precios de bebidas antes de pedir.</p>
+  </footer>
+
+  @if (cart.itemCount()) {
+    <button class="floating-cart" type="button" (click)="cartOpen.set(true)" [attr.aria-label]="'Revisar pedido con ' + cart.itemCount() + ' productos, total S/ ' + cart.total().toFixed(2)">
+      <span class="floating-count">{{ cart.itemCount() }}</span>
+      <span>Ver mi pedido</span>
+      <strong>S/ {{ cart.total().toFixed(2) }}</strong>
+      <span class="floating-arrow" aria-hidden="true">↗</span>
+    </button>
+  }
+
+  <app-cart-drawer [open]="cartOpen()" (closed)="cartOpen.set(false)" />
+</div>

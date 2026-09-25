@@ -1,0 +1,81 @@
+@if (open()) {
+  <button class="backdrop" type="button" tabindex="-1" (click)="closed.emit()" aria-label="Cerrar pedido"></button>
+  <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="cart-title" aria-describedby="cart-subtitle">
+    <header class="drawer-header">
+      <div>
+        <span class="drawer-eyebrow">LA ESTACIÓN 365 / TU SELECCIÓN</span>
+        <h2 id="cart-title">Mi pedido</h2>
+        <p id="cart-subtitle">Revisa tus platos antes de abrir WhatsApp.</p>
+      </div>
+      <button id="close-cart" class="close" type="button" (click)="closed.emit()" aria-label="Cerrar pedido">×</button>
+    </header>
+
+    <div class="drawer-body">
+      @if (!cart.items().length) {
+        <div class="empty-state">
+          <div class="empty-icon" aria-hidden="true">⌁</div>
+          <h3>Empieza por algo rico</h3>
+          <p>Explora la carta y agrega los platos que más te provoquen.</p>
+          <button type="button" (click)="closed.emit()">Explorar la carta <span aria-hidden="true">↗</span></button>
+        </div>
+      } @else {
+        <section class="cart-section" aria-labelledby="summary-title">
+          <div class="section-title"><span>01</span><h3 id="summary-title">Tus platos</h3><small>{{ cart.itemCount() }} {{ cart.itemCount() === 1 ? 'unidad' : 'unidades' }}</small></div>
+          <div class="items">
+            @for (item of cart.items(); track item.product.id) {
+              <article class="cart-item">
+                @if (item.product.image) { <img [src]="item.product.image" [alt]="item.product.imageAlt || item.product.name"> }
+                @else { <span class="cart-item-mark" aria-hidden="true"><img src="/brand/logo-icon.png" alt=""></span> }
+                <div class="item-main">
+                  <div class="item-title"><h4>{{ item.product.name }}</h4><strong>{{ (item.product.price ?? 0) * item.quantity | currency:'PEN':'symbol-narrow':'1.2-2':'es-PE' }}</strong></div>
+                  <p class="unit-price">{{ item.product.price | currency:'PEN':'symbol-narrow':'1.2-2':'es-PE' }} por unidad</p>
+                  <div class="item-actions">
+                    <div class="quantity" [attr.aria-label]="'Cantidad de ' + item.product.name">
+                      <button type="button" (click)="cart.setQuantity(item.product.id, item.quantity - 1)" [attr.aria-label]="'Quitar una unidad de ' + item.product.name">−</button>
+                      <span aria-live="polite">{{ item.quantity }}</span>
+                      <button type="button" (click)="cart.setQuantity(item.product.id, item.quantity + 1)" [attr.aria-label]="'Agregar una unidad de ' + item.product.name">+</button>
+                    </div>
+                    <button class="remove" type="button" (click)="cart.remove(item.product.id)" [attr.aria-label]="'Eliminar ' + item.product.name + ' del pedido'">Eliminar</button>
+                  </div>
+                  <label [for]="'note-' + item.product.id">Indicaciones para este plato</label>
+                  <input [id]="'note-' + item.product.id" type="text" [ngModel]="item.notes" (ngModelChange)="cart.updateNotes(item.product.id, $event)" placeholder="Ej. sin picante" maxlength="100">
+                </div>
+              </article>
+            }
+          </div>
+        </section>
+
+        <section class="customer-section" aria-labelledby="customer-title">
+          <div class="section-title"><span>02</span><h3 id="customer-title">Entrega y contacto</h3></div>
+          <fieldset>
+            <legend>¿Cómo recibirás tu pedido?</legend>
+            <div class="method-options">
+              <label [class.selected]="customer.method === 'pickup'"><input type="radio" name="method" value="pickup" [(ngModel)]="customer.method" (ngModelChange)="clearError()"><span><strong>Recojo en local</strong><small>Coordina la hora por WhatsApp</small></span></label>
+              <label [class.selected]="customer.method === 'delivery'"><input type="radio" name="method" value="delivery" [(ngModel)]="customer.method" (ngModelChange)="clearError()"><span><strong>Entrega a domicilio</strong><small>Delivery gratis · consulta cobertura</small></span></label>
+            </div>
+          </fieldset>
+          <div class="field-grid">
+            <div class="field"><label for="customer-name">Nombre completo <span aria-hidden="true">*</span></label><input id="customer-name" type="text" [(ngModel)]="customer.name" (ngModelChange)="clearError()" autocomplete="name" [attr.aria-invalid]="nameInvalid()" [class.invalid]="nameInvalid()" required>@if (nameInvalid()) { <small class="field-error">Ingresa al menos 2 caracteres.</small> }</div>
+            <div class="field"><label for="customer-phone">Teléfono <span aria-hidden="true">*</span></label><input id="customer-phone" type="tel" [(ngModel)]="customer.phone" (ngModelChange)="clearError()" autocomplete="tel" inputmode="tel" placeholder="Ej. 987 091 127" [attr.aria-invalid]="phoneInvalid()" [class.invalid]="phoneInvalid()" required>@if (phoneInvalid()) { <small class="field-error">Ingresa un número válido.</small> }</div>
+          </div>
+          @if (customer.method === 'delivery') {
+            <div class="delivery-fields">
+              <div class="field"><label for="customer-address">Dirección de entrega <span aria-hidden="true">*</span></label><input id="customer-address" type="text" [(ngModel)]="customer.address" (ngModelChange)="clearError()" autocomplete="street-address" placeholder="Calle, número y distrito" [attr.aria-invalid]="addressInvalid()" [class.invalid]="addressInvalid()" required>@if (addressInvalid()) { <small class="field-error">Completa tu dirección.</small> }</div>
+              <div class="field"><label for="customer-reference">Referencia <small>Opcional</small></label><textarea id="customer-reference" [(ngModel)]="customer.reference" rows="2" placeholder="Ej. portón azul, frente al parque" maxlength="120"></textarea></div>
+            </div>
+          }
+        </section>
+      }
+    </div>
+
+    @if (cart.items().length) {
+      <footer class="drawer-footer">
+        <div class="total-row"><span>Total de productos</span><strong>{{ cart.total() | currency:'PEN':'symbol-narrow':'1.2-2':'es-PE' }}</strong></div>
+        @if (customer.method === 'delivery') { <p class="delivery-note">Delivery gratis. Confirma la cobertura por WhatsApp.</p> }
+        @if (errorMessage()) { <p class="form-error" role="alert">{{ errorMessage() }}</p> }
+        <button class="whatsapp" type="button" (click)="sendOrder()">Enviar pedido por WhatsApp <span aria-hidden="true">↗</span></button>
+        <p class="send-note">WhatsApp abrirá el mensaje para que tú lo envíes.</p>
+      </footer>
+    }
+  </aside>
+}

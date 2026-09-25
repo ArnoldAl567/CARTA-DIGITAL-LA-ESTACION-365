@@ -1,0 +1,34 @@
+<article class="product-card" [class.featured]="product().featured" [class.text-only]="!product().image" [class.unpriced]="product().price === null">
+  @if (product().image) {
+    <div class="product-image-wrap">
+      <img class="product-image" [src]="product().image" [alt]="product().imageAlt || product().name" loading="lazy">
+      @if (product().badge) { <span class="badge">{{ product().badge }}</span> }
+      <span class="reference">Imagen referencial</span>
+    </div>
+  }
+  <div class="product-copy">
+    <div class="product-topline">
+      <span>{{ product().categoryId === 'bebidas' ? 'Para acompañar' : 'La Estación 365' }}</span>
+      @if (quantity() > 0) { <span class="in-cart">En tu pedido</span> }
+    </div>
+    <h3>{{ product().name }}</h3>
+    @if (product().description) { <p>{{ product().description }}</p> }
+    <div class="product-footer">
+      @if (product().price !== null) { <strong class="price">{{ product().price | currency:'PEN':'symbol-narrow':'1.0-0':'es-PE' }}</strong> }
+      @else { <span class="price-on-request">Precio por consultar</span> }
+      @if (product().price === null) {
+        <a class="ask-button" [href]="'https://wa.me/' + whatsapp + '?text=' + encodeURIComponent('Hola, quisiera consultar el precio y disponibilidad de ' + product().name + '.')" target="_blank" rel="noopener noreferrer">Consultar <span aria-hidden="true">↗</span></a>
+      } @else if (quantity() > 0) {
+        <div class="stepper" [attr.aria-label]="'Cantidad de ' + product().name">
+          <button type="button" (click)="decreased.emit(product())" [attr.aria-label]="'Quitar una unidad de ' + product().name">−</button>
+          <span aria-live="polite">{{ quantity() }}</span>
+          <button type="button" (click)="add()" [attr.aria-label]="'Agregar una unidad de ' + product().name">+</button>
+        </div>
+      } @else {
+        <button type="button" class="add-button" [class.added]="justAdded()" (click)="add()" [attr.aria-label]="'Agregar ' + product().name + ' al pedido'">
+          <span>Agregar</span><span aria-hidden="true">+</span>
+        </button>
+      }
+    </div>
+  </div>
+</article>
