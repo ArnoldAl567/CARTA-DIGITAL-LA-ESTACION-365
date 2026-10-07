@@ -14,7 +14,7 @@
     <h3>{{ product().name }}</h3>
     @if (product().description) { <p>{{ product().description }}</p> }
     <div class="product-footer">
-      @if (product().price !== null) { <strong class="price">{{ product().price | currency:'PEN':'symbol-narrow':'1.0-0':'es-PE' }}</strong> }
+      @if (product().price !== null) { <strong class="price">{{ product().price | currency:'PEN':'symbol-narrow':'1.0-2':'es-PE' }}</strong> }
       @else { <span class="price-on-request">Precio por consultar</span> }
       @if (product().price === null) {
         <a class="ask-button" [href]="'https://wa.me/' + whatsapp + '?text=' + encodeURIComponent('Hola, quisiera consultar el precio y disponibilidad de ' + product().name + '.')" target="_blank" rel="noopener noreferrer">Consultar <span aria-hidden="true">↗</span></a>

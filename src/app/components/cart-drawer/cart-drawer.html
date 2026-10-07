@@ -56,7 +56,7 @@
           </fieldset>
           <div class="field-grid">
             <div class="field"><label for="customer-name">Nombre completo <span aria-hidden="true">*</span></label><input id="customer-name" type="text" [(ngModel)]="customer.name" (ngModelChange)="clearError()" autocomplete="name" [attr.aria-invalid]="nameInvalid()" [class.invalid]="nameInvalid()" required>@if (nameInvalid()) { <small class="field-error">Ingresa al menos 2 caracteres.</small> }</div>
-            <div class="field"><label for="customer-phone">Teléfono <span aria-hidden="true">*</span></label><input id="customer-phone" type="tel" [(ngModel)]="customer.phone" (ngModelChange)="clearError()" autocomplete="tel" inputmode="tel" placeholder="Ej. 987 091 127" [attr.aria-invalid]="phoneInvalid()" [class.invalid]="phoneInvalid()" required>@if (phoneInvalid()) { <small class="field-error">Ingresa un número válido.</small> }</div>
+            <div class="field"><label for="customer-phone">Teléfono <span aria-hidden="true">*</span></label><input #phoneInput id="customer-phone" type="tel" [ngModel]="customer.phone" (ngModelChange)="setPhone($event, phoneInput)" autocomplete="tel-national" inputmode="numeric" pattern="[0-9]{9}" placeholder="Ej. 987654321" [attr.aria-invalid]="phoneInvalid()" [class.invalid]="phoneInvalid()" required>@if (phoneInvalid()) { <small class="field-error">Ingresa exactamente 9 dígitos.</small> }</div>
           </div>
           @if (customer.method === 'delivery') {
             <div class="delivery-fields">
@@ -73,8 +73,8 @@
         <div class="total-row"><span>Total de productos</span><strong>{{ cart.total() | currency:'PEN':'symbol-narrow':'1.2-2':'es-PE' }}</strong></div>
         @if (customer.method === 'delivery') { <p class="delivery-note">Delivery gratis. Confirma la cobertura por WhatsApp.</p> }
         @if (errorMessage()) { <p class="form-error" role="alert">{{ errorMessage() }}</p> }
-        <button class="whatsapp" type="button" (click)="sendOrder()">Enviar pedido por WhatsApp <span aria-hidden="true">↗</span></button>
-        <p class="send-note">WhatsApp abrirá el mensaje para que tú lo envíes.</p>
+        <button class="whatsapp" type="button" (click)="sendOrder()">Continuar a WhatsApp <span aria-hidden="true">↗</span></button>
+        <p class="send-note">Revisa y envía el mensaje en WhatsApp. El pedido quedará pendiente de confirmación.</p>
       </footer>
     }
   </aside>

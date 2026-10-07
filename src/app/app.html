@@ -29,7 +29,7 @@
         </label>
         <nav class="categories" aria-label="Categorías de la carta">
           <button type="button" [class.active]="activeCategory() === 'all'" [attr.aria-pressed]="activeCategory() === 'all'" (click)="selectCategory('all')">Toda la carta</button>
-          @for (category of categories; track category.id) {
+          @for (category of categories(); track category.id) {
             <button type="button" [class.active]="activeCategory() === category.id" [attr.aria-pressed]="activeCategory() === category.id" (click)="selectCategory(category.id)">{{ category.shortName }}</button>
           }
         </nav>
@@ -81,7 +81,7 @@
   <footer class="site-footer">
     <div class="footer-main"><strong>{{ config.name }}</strong><p>{{ config.tagline }}</p></div>
     <div class="footer-contact"><span>PEDIDOS POR WHATSAPP</span><a [href]="'https://wa.me/' + config.whatsapp" target="_blank" rel="noopener noreferrer">{{ config.displayWhatsapp }} <span aria-hidden="true">↗</span></a></div>
-    <p class="footer-note">Precios en soles. Delivery gratis; confirma la cobertura y disponibilidad por WhatsApp. Consulta los precios de bebidas antes de pedir.</p>
+    <p class="footer-note">Precios en soles. Delivery gratis; confirma la cobertura y disponibilidad por WhatsApp.</p>
   </footer>
 
   @if (cart.itemCount()) {

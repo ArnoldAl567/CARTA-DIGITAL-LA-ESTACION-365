@@ -55,8 +55,14 @@ export class CartDrawer implements OnChanges, OnDestroy {
 
   nameInvalid(): boolean { return this.submitted() && this.customer.name.trim().length < 2; }
   phoneInvalid(): boolean {
-    const count = this.customer.phone.replace(/\D/g, '').length;
-    return this.submitted() && (count < 9 || count > 12);
+    return this.submitted() && !/^\d{9}$/.test(this.customer.phone);
+  }
+  setPhone(value: string, input: HTMLInputElement): void {
+    const pastedDigits = value.replace(/\D/g, '');
+    const digits = (pastedDigits.length > 9 && pastedDigits.startsWith('51') ? pastedDigits.slice(2) : pastedDigits).slice(0, 9);
+    this.customer.phone = digits;
+    input.value = digits;
+    this.clearError();
   }
   addressInvalid(): boolean { return this.submitted() && this.customer.method === 'delivery' && this.customer.address.trim().length < 6; }
   clearError(): void { this.errorMessage.set(''); }
@@ -66,18 +72,21 @@ export class CartDrawer implements OnChanges, OnDestroy {
     this.errorMessage.set('');
     if (!this.cart.items().length) { this.errorMessage.set('Agrega al menos un plato para continuar.'); return; }
     if (this.nameInvalid()) { this.errorMessage.set('Ingresa tu nombre para continuar.'); document.getElementById('customer-name')?.focus(); return; }
-    if (this.phoneInvalid()) { this.errorMessage.set('Ingresa un teléfono válido.'); document.getElementById('customer-phone')?.focus(); return; }
+    if (this.phoneInvalid()) { this.errorMessage.set('Ingresa un teléfono de 9 dígitos.'); document.getElementById('customer-phone')?.focus(); return; }
     if (this.addressInvalid()) { this.errorMessage.set('Ingresa la dirección de entrega.'); document.getElementById('customer-address')?.focus(); return; }
 
-    const delivery = this.customer.method === 'delivery'
-      ? `Entrega a domicilio\nDirección: ${this.customer.address.trim()}${this.customer.reference.trim() ? `\nReferencia: ${this.customer.reference.trim()}` : ''}`
-      : 'Recojo en local';
-    const products = this.cart.items().map((item, index) => {
+    const clean = (value: string) => value.trim().replace(/\s+/g, ' ');
+    const products = this.cart.items().map(item => {
       const price = item.product.price ?? 0;
       const subtotal = price * item.quantity;
-      return `${index + 1}. ${item.quantity} × ${item.product.name}\n   S/ ${price.toFixed(2)} c/u · Subtotal: S/ ${subtotal.toFixed(2)}${item.notes.trim() ? `\n   Indicación: ${item.notes.trim()}` : ''}`;
-    }).join('\n\n');
-    const message = `¡Hola, ${this.config.name}! Quiero realizar este pedido:\n\nDATOS DEL CLIENTE\nNombre: ${this.customer.name.trim()}\nTeléfono: ${this.customer.phone.trim()}\nModalidad: ${delivery}\n\nPRODUCTOS\n${products}\n\nTOTAL: S/ ${this.cart.total().toFixed(2)}\n\nPor favor, confirmen disponibilidad, tiempo y cobertura de delivery. Gracias.`;
+      return `• ${item.quantity} × ${item.product.name} · S/ ${subtotal.toFixed(2)}${clean(item.notes) ? `\n  Nota: ${clean(item.notes)}` : ''}`;
+    }).join('\n');
+    const contact = `${clean(this.customer.name)} · ${clean(this.customer.phone)}`;
+    const delivery = this.customer.method === 'delivery'
+      ? `*Entrega a domicilio*\n${contact}\n${clean(this.customer.address)}${clean(this.customer.reference) ? `\nRef.: ${clean(this.customer.reference)}` : ''}\n_Delivery gratis según cobertura._`
+      : `*Recojo en local*\n${contact}`;
+    const title = `*PEDIDO · ${this.config.name}*`;
+    const message = `${title}\n\n*Productos*\n${products}\n\n*Total: S/ ${this.cart.total().toFixed(2)}*\n\n${delivery}\n\n_Confirma disponibilidad y tiempo estimado, por favor._`;
     window.open(`https://wa.me/${this.config.whatsapp}?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
   }
 }

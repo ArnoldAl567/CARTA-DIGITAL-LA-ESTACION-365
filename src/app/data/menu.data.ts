@@ -2,8 +2,8 @@ import { Category, Product } from '../models/menu.models';
 
 export const BUSINESS_CONFIG = {
   name: 'LA ESTACIÓN 365',
-  whatsapp: '51987091127',
-  displayWhatsapp: '+51 987 091 127',
+  whatsapp: '51902586908', // Contacto temporal de IntegraTech.
+  displayWhatsapp: '+51 902 586 908',
   currency: 'PEN',
   locale: 'es-PE',
   tagline: 'Restaurante & cevichería',
@@ -15,10 +15,10 @@ export const CATEGORIES: Category[] = [
   { id: 'caldos', name: 'Caldos', shortName: 'Caldos', description: 'Reconfortantes y llenos de sabor.' },
   { id: 'mix', name: 'Mix', shortName: 'Mix', description: 'Cecina, chorizo y sabores amazónicos.' },
   { id: 'broaster', name: 'Broaster', shortName: 'Broaster', description: 'Pollo crocante con tus acompañamientos favoritos.' },
-  { id: 'bebidas', name: 'Bebidas', shortName: 'Bebidas', description: 'Consulta las opciones y precios disponibles por WhatsApp.' },
+  { id: 'bebidas', name: 'Bebidas', shortName: 'Bebidas', description: 'El acompañamiento perfecto para tu plato.' },
 ];
 
-// Los precios se transcribieron de las capturas proporcionadas. Las bebidas no muestran precio.
+// Los precios de platos se transcribieron de las capturas proporcionadas. Los de bebidas son sugeridos.
 const MENU_ENTRIES: Product[] = [
   { id: 'arroz-mariscos', categoryId: 'marinos', name: 'Arroz con mariscos', price: 20, featured: true },
   { id: 'chaufa-mariscos', categoryId: 'marinos', name: 'Chaufa de mariscos', price: 20 },
@@ -64,18 +64,19 @@ const MENU_ENTRIES: Product[] = [
   { id: 'broaster-papas', categoryId: 'broaster', name: 'Broaster + papas fritas', price: 12 },
   { id: 'broaster-papas-chaufa', categoryId: 'broaster', name: 'Broaster + papas fritas + chaufa', price: 15 },
 
-  { id: 'gaseosas', categoryId: 'bebidas', name: 'Gaseosas', price: null },
-  { id: 'chicha', categoryId: 'bebidas', name: 'Chicha', price: null },
-  { id: 'maracuya', categoryId: 'bebidas', name: 'Maracuyá', price: null },
-  { id: 'tragos', categoryId: 'bebidas', name: 'Tragos', price: null },
-  { id: 'infusiones', categoryId: 'bebidas', name: 'Infusiones', price: null },
-  { id: 'cafe', categoryId: 'bebidas', name: 'Café', price: null },
-  { id: 'jugos', categoryId: 'bebidas', name: 'Jugos', price: null },
+  { id: 'gaseosas', categoryId: 'bebidas', name: 'Gaseosas', price: 5 },
+  { id: 'chicha', categoryId: 'bebidas', name: 'Chicha', price: 5 },
+  { id: 'maracuya', categoryId: 'bebidas', name: 'Maracuyá', price: 5 },
+  { id: 'tragos', categoryId: 'bebidas', name: 'Tragos', price: 15 },
+  { id: 'infusiones', categoryId: 'bebidas', name: 'Infusiones', price: 3 },
+  { id: 'cafe', categoryId: 'bebidas', name: 'Café', price: 5 },
+  { id: 'jugos', categoryId: 'bebidas', name: 'Jugos', price: 7 },
 ];
 
 // Cada ficha tiene su propia fotografía: la categoría distingue incluso los platos repetidos.
 export const PRODUCTS: Product[] = MENU_ENTRIES.map(product => ({
   ...product,
+  id: `${product.categoryId}-${product.id}`,
   image: `images/menu/${product.categoryId}-${product.id}.webp`,
   imageAlt: product.name,
 }));

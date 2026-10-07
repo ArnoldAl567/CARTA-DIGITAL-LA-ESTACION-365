@@ -1,30 +1,32 @@
-# La Estación 365 · Carta digital
+# La Estación 365 — carta digital
 
-Carta responsive hecha con Angular. El cliente explora platos, ajusta cantidades, escribe indicaciones y prepara un mensaje de pedido para WhatsApp. El negocio recibe el pedido cuando el cliente envía ese mensaje.
+Carta pública creada con Angular. Contiene 46 productos en 6 categorías, con una imagen distinta para cada ficha, búsqueda, carrito y preparación del pedido por WhatsApp.
 
-## Ejecutar
+## Estado actual
 
-```bash
-npm install
-npm start
-```
+Este proyecto funciona **solo con el frontend**. Los platos y precios se leen de `src/app/data/menu.data.ts` y las imágenes de `public/images/menu/`. No hay API, Laravel, PostgreSQL ni panel de administración activo. Sanity aún no está conectado; hasta integrarlo, cualquier cambio en la carta requiere editar el archivo local y volver a publicar el sitio.
 
-Abre `http://localhost:4200/` (o el puerto que indique Angular). Para generar la versión de producción:
+## Desarrollo y publicación
 
-```bash
-npm run build
-```
+Requiere Node.js y npm. En la raíz del proyecto:
 
-La compilación queda en `dist/sabor-a-mar/browser`; ese nombre interno se conserva para no alterar la configuración de despliegue existente.
+1. `npm install`
+2. `npm start` y abre `http://localhost:4200/`
+3. `npm run build` para generar el sitio estático en `dist/sabor-a-mar/browser/`
 
-## Contenido de la carta
+El sitio compilado puede publicarse en un alojamiento para archivos estáticos. No necesita un proceso PHP ni una base de datos.
 
-- `src/app/data/menu.data.ts`: nombre, WhatsApp, categorías, platos y precios. Los 39 platos con precio y las siete opciones de bebidas se transcribieron de las tres capturas entregadas. Chaufa de mariscos figura en marinos y criollos, como en las capturas, pero comparte un mismo artículo en el carrito.
-- Las capturas no indican precios para las bebidas. Por eso se muestran como “Precio por consultar” con un enlace a WhatsApp y no se pueden añadir al carrito hasta definir sus precios.
-- `public/brand/`: versiones transparentes del logo extraídas del PDF proporcionado. La versión completa se usa en la cabecera y el isotipo como favicon y apoyo visual del carrito.
-- `public/images/menu/`: 46 fotografías referenciales individuales, una por cada ficha de la carta, incluidas las bebidas. Las imágenes están optimizadas en WebP para que carguen bien en celular.
-- `src/styles.scss`: colores generales adaptados al azul y verde del logo.
+## Editar la carta mientras se conecta Sanity
 
-El número de WhatsApp usado es el que aparece en la captura: **+51 987 091 127**. La carta indica delivery gratis; la aplicación recomienda confirmar la cobertura y disponibilidad por WhatsApp.
+En `src/app/data/menu.data.ts`, modifica el `price` del producto en `MENU_ENTRIES`. Para retirarlo temporalmente de la carta, agrega `active: false`; quita esa propiedad o usa `active: true` para mostrarlo de nuevo. Las imágenes se encuentran en `public/images/menu/`. Los precios de bebidas son sugeridos: confirma con el restaurante el tamaño de cada presentación y el precio final antes de publicar.
 
-El pedido se conserva en el navegador mediante `localStorage`. Esta versión funciona en el frontend; no procesa pagos ni guarda pedidos en un servidor.
+Los productos ocultos no aparecen en la carta ni pueden permanecer en un carrito restaurado. Al conectar Sanity, estos campos pasarán a editarse desde su panel y dejarán de requerir una nueva publicación para cada cambio.
+
+## Cambiar el número de WhatsApp
+
+El contacto configurado actualmente es el **WhatsApp de IntegraTech: +51 902 586 908**. Los pedidos llegarán a ese número hasta que se configure el del restaurante. El pie de página y el pedido usan `BUSINESS_CONFIG` en `src/app/data/menu.data.ts`:
+
+- `whatsapp`: código de país y número, solo dígitos, sin `+`, espacios ni guiones. Ejemplo: `51987654321`.
+- `displayWhatsapp`: el mismo número con formato legible. Ejemplo: `+51 987 654 321`.
+
+Vuelve a compilar o publicar después del cambio y prueba un pedido. La carta prepara el mensaje; el cliente debe pulsar **Enviar** en WhatsApp. El pedido queda pendiente de confirmación.

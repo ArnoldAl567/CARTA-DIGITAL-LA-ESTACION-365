@@ -14,10 +14,12 @@ describe('App', () => {
     expect(app).toBeTruthy();
   });
 
-  it('should render the restaurant hero', () => {
+  it('should render the restaurant hero and local menu', async () => {
     const fixture = TestBed.createComponent(App);
+    await fixture.whenStable();
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('El sabor del mar');
+    expect(compiled.querySelector('h1')?.textContent).toContain('Sabores para');
+    expect(compiled.textContent).toContain('Arroz con mariscos');
   });
 });
