@@ -1,10 +1,14 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { App } from './app';
+import { CATEGORIES, PRODUCTS } from './data/menu.data';
+import { MenuService } from './services/menu.service';
 
 describe('App', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [App],
+      providers: [{ provide: MenuService, useValue: { categories: signal(CATEGORIES), products: signal(PRODUCTS) } }],
     }).compileComponents();
   });
 
