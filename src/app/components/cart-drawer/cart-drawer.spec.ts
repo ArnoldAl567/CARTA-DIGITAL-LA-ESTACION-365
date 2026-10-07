@@ -45,7 +45,8 @@ describe('CartDrawer WhatsApp order', () => {
     const message = sentMessage(open);
     expect(message).toContain('Nota: sin picante');
     expect(message).toContain('*Entrega a domicilio*\nAna Pérez · 987654321\nAv. Principal 123\nRef.: Frente al parque');
-    expect(message).toContain('Delivery gratis según cobertura.');
+    expect(message).not.toContain('Delivery gratis según cobertura.');
+    expect(message).not.toContain('Confirma disponibilidad y tiempo estimado');
   });
 
   it('keeps only nine digits when a formatted number is pasted', () => {

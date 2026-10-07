@@ -83,10 +83,10 @@ export class CartDrawer implements OnChanges, OnDestroy {
     }).join('\n');
     const contact = `${clean(this.customer.name)} · ${clean(this.customer.phone)}`;
     const delivery = this.customer.method === 'delivery'
-      ? `*Entrega a domicilio*\n${contact}\n${clean(this.customer.address)}${clean(this.customer.reference) ? `\nRef.: ${clean(this.customer.reference)}` : ''}\n_Delivery gratis según cobertura._`
+      ? `*Entrega a domicilio*\n${contact}\n${clean(this.customer.address)}${clean(this.customer.reference) ? `\nRef.: ${clean(this.customer.reference)}` : ''}`
       : `*Recojo en local*\n${contact}`;
     const title = `*PEDIDO · ${this.config.name}*`;
-    const message = `${title}\n\n*Productos*\n${products}\n\n*Total: S/ ${this.cart.total().toFixed(2)}*\n\n${delivery}\n\n_Confirma disponibilidad y tiempo estimado, por favor._`;
+    const message = `${title}\n\n*Productos*\n${products}\n\n*Total: S/ ${this.cart.total().toFixed(2)}*\n\n${delivery}`;
     window.open(`https://wa.me/${this.config.whatsapp}?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
   }
 }
