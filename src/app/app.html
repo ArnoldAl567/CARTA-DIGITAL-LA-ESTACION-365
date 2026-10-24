@@ -12,8 +12,16 @@
       <h2 class="visually-hidden">La carta</h2>
 
       <div class="menu-section-picker" role="group" aria-label="Tipo de carta">
-        <button type="button" [class.selected]="activeSection() === 'menu-dia'" [attr.aria-pressed]="activeSection() === 'menu-dia'" (click)="activeSection.set('menu-dia')">Menú del día</button>
-        <button type="button" [class.selected]="activeSection() === 'carta'" [attr.aria-pressed]="activeSection() === 'carta'" (click)="activeSection.set('carta')">Platos a la carta</button>
+        <button type="button" [class.selected]="activeSection() === 'menu-dia'" [attr.aria-pressed]="activeSection() === 'menu-dia'" (click)="activeSection.set('menu-dia')">
+          <span class="picker-icon" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="17" r="8"/><circle cx="16" cy="17" r="4.5"/><path d="M4.5 8v17M7.5 8v17M25 8v17M28 8v17"/></svg></span>
+          <span class="picker-label">Menú del día</span>
+          <span class="picker-arrow" aria-hidden="true">↗</span>
+        </button>
+        <button type="button" [class.selected]="activeSection() === 'carta'" [attr.aria-pressed]="activeSection() === 'carta'" (click)="activeSection.set('carta')">
+          <span class="picker-icon" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><path d="M5 24h22M8 21a8 8 0 0 1 16 0H8ZM16 9v3M13 9h6"/><path d="M10 27h12"/></svg></span>
+          <span class="picker-label">Platos a la carta</span>
+          <span class="picker-arrow" aria-hidden="true">↗</span>
+        </button>
       </div>
 
       @if (activeSection() === 'carta') {

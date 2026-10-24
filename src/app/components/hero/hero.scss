@@ -3,6 +3,8 @@
   margin: 18px auto 0;
   overflow: hidden;
   border-radius: 20px;
+  box-shadow: 0 20px 50px rgba(49, 106, 54, .12);
+  animation: hero-enter .65s var(--ease) both;
 }
 
 .hero-image {
@@ -10,6 +12,10 @@
   width: 100%;
   height: auto;
 }
+
+@keyframes hero-enter { from { opacity: .5; transform: translateY(12px); } }
+
+@media (prefers-reduced-motion: reduce) { .hero { animation: none; } }
 
 @media (max-width: 950px) {
   .hero {
