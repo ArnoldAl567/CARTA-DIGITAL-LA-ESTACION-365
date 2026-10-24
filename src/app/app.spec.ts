@@ -23,7 +23,8 @@ describe('App', () => {
     await fixture.whenStable();
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Sabores para');
+    expect(compiled.querySelector('h1')?.textContent).toContain('La Estación 365');
+    expect(compiled.querySelector('.hero-image')?.getAttribute('src')).toBe('/images/portada-estacion-365.png');
     expect(compiled.textContent).toContain('Arroz con mariscos');
   });
 });
