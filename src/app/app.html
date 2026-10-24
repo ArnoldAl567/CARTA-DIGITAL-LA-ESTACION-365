@@ -78,10 +78,51 @@
     </section>
   </main>
 
-  <footer class="site-footer">
-    <div class="footer-main"><strong>{{ config.name }}</strong><p>{{ config.tagline }}</p></div>
-    <div class="footer-contact"><span>PEDIDOS POR WHATSAPP</span><a [href]="'https://wa.me/' + config.whatsapp" target="_blank" rel="noopener noreferrer">{{ config.displayWhatsapp }} <span aria-hidden="true">↗</span></a></div>
-    <p class="footer-note">Precios en soles. Delivery gratis; confirma la cobertura y disponibilidad por WhatsApp.</p>
+  <footer class="site-footer" id="contacto">
+    <div class="footer-shell">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <div class="footer-logo-panel">
+            <img src="/brand/logo-full.png" alt="La Estación 365, restaurante y cevichería" width="300" height="100" loading="lazy">
+          </div>
+          <p>El sabor del mar y de nuestra cocina, siempre cerca de ti.</p>
+        </div>
+
+        <div class="footer-details">
+          <section class="footer-info-card" aria-labelledby="footer-location-title">
+            <span class="footer-card-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+            </span>
+            <h2 id="footer-location-title">Encuéntranos</h2>
+            <address>{{ config.addressLine1 }}<br>{{ config.addressLine2 }}</address>
+            <a class="footer-text-link" [href]="config.mapsUrl" target="_blank" rel="noopener noreferrer">Ver ubicación <span aria-hidden="true">↗</span></a>
+          </section>
+
+          <section class="footer-info-card" aria-labelledby="footer-hours-title">
+            <span class="footer-card-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
+            </span>
+            <h2 id="footer-hours-title">Horario de atención</h2>
+            <div class="footer-hours"><span>Lunes a viernes</span><strong>{{ config.weekdayHours }}</strong></div>
+            <div class="footer-hours"><span>Sábado y domingo</span><strong>{{ config.weekendHours }}</strong></div>
+          </section>
+
+          <section class="footer-info-card footer-whatsapp" aria-labelledby="footer-whatsapp-title">
+            <span class="footer-card-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M20.5 11.8a8.5 8.5 0 0 1-12.4 7.5L3.5 20.5l1.2-4.6a8.5 8.5 0 1 1 15.8-4.1Z"/><path d="M8.8 8.5c.3-.4.5-.5.8-.5h.5c.2 0 .4.1.5.4l.7 1.7c.1.2.1.4 0 .6l-.6.8c.8 1.4 1.8 2.4 3.2 3.1l.8-.6c.2-.1.4-.1.6 0l1.7.8c.3.1.4.3.4.5v.4c0 .4-.2.6-.5.9-.5.4-1 .6-1.7.5-3.2-.5-6.7-4-7.2-7.2-.1-.6.1-1.2.8-1.4Z"/></svg>
+            </span>
+            <h2 id="footer-whatsapp-title">Pedidos por WhatsApp</h2>
+            <p>Escríbenos para hacer tu pedido.</p>
+            <a class="footer-whatsapp-button" [href]="'https://wa.me/' + config.whatsapp" target="_blank" rel="noopener noreferrer">{{ config.displayWhatsapp }} <span aria-hidden="true">↗</span></a>
+          </section>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>© {{ currentYear }} La Estación 365. Todos los derechos reservados.</p>
+        <a href="#inicio" class="back-to-top">Volver arriba <span aria-hidden="true">↑</span></a>
+      </div>
+    </div>
   </footer>
 
   @if (cart.itemCount()) {

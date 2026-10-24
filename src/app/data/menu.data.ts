@@ -7,6 +7,11 @@ export const BUSINESS_CONFIG = {
   currency: 'PEN',
   locale: 'es-PE',
   tagline: 'Restaurante & cevichería',
+  addressLine1: 'Los Pinos 461',
+  addressLine2: 'San Miguel 15086',
+  mapsUrl: 'https://www.google.com/maps/search/?api=1&query=Los+Pinos+461%2C+San+Miguel+15086',
+  weekdayHours: '8:00 a. m. – 5:00 p. m.',
+  weekendHours: '8:00 a. m. – medianoche',
 };
 
 export const CATEGORIES: Category[] = [

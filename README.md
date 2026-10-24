@@ -46,3 +46,7 @@ El contacto configurado actualmente es el **WhatsApp de IntegraTech: +51 902 586
 - `displayWhatsapp`: el mismo número con formato legible. Ejemplo: `+51 987 654 321`.
 
 Vuelve a compilar o publicar después del cambio y prueba un pedido. La carta prepara el mensaje; el cliente debe pulsar **Enviar** en WhatsApp. El pedido queda pendiente de confirmación.
+
+## Cambiar dirección y horarios
+
+El pie de página usa `addressLine1`, `addressLine2`, `mapsUrl`, `weekdayHours` y `weekendHours` de `BUSINESS_CONFIG` en `src/app/data/menu.data.ts`. Si cambia la dirección, actualiza también `mapsUrl` para que **Ver ubicación** abra el lugar correcto. Después, vuelve a publicar la carta.

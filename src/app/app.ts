@@ -23,6 +23,7 @@ export class App {
   readonly menu = inject(MenuService);
   readonly cart = inject(CartService);
   readonly config = BUSINESS_CONFIG;
+  readonly currentYear = new Date().getFullYear();
   readonly categories = computed(() => this.menu.categories().filter(category => category.active !== false));
   readonly products = this.menu.products;
   readonly activeCategory = signal<'all' | CategoryId>('all');
