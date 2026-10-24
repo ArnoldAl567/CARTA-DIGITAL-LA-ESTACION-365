@@ -62,38 +62,59 @@
         </div>
       }
       } @else {
-        <section class="daily-menu" aria-labelledby="daily-menu-title">
-          <div class="daily-intro">
-            <div>
-              <span class="daily-kicker">LA ESTACIÓN 365</span>
-              <h2 id="daily-menu-title">Menú del día</h2>
-              <p>Añade los fondos que quieras y elige una entrada para cada uno.</p>
-            </div>
-            <div class="daily-price-note"><strong>S/ 12 · S/ 14</strong><span>Según el fondo elegido</span></div>
+        <section class="daily-menu" aria-label="Menú del día">
+          <div class="search-box daily-search" role="search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg>
+            <input type="search" aria-label="Buscar platos del menú del día" placeholder="Buscar platos del menú del día..." [ngModel]="dailySearchTerm()" (ngModelChange)="dailySearchTerm.set($event)" autocomplete="off">
+            @if (dailySearchTerm()) { <button type="button" (click)="dailySearchTerm.set('')" aria-label="Borrar búsqueda">×</button> }
           </div>
           @if (dailyStarters().length && dailyMains().length) {
           <div class="daily-columns">
             <section class="daily-course" aria-labelledby="daily-mains-title">
-              <div class="daily-course-heading"><span>01</span><h3 id="daily-mains-title">Platos de fondo</h3><small>Puedes repetir</small></div>
-              <div class="daily-options">
-                @for (dish of dailyMains(); track dish.id) {
-                  <button type="button" class="daily-option" (click)="addDailyMain(dish.id)" [attr.aria-label]="'Añadir ' + dish.name + ' a tus menús'"><span>{{ dish.name }}</span><strong>S/ {{ dish.price }}</strong><span class="daily-check" aria-hidden="true">+</span></button>
+              <div class="category-heading daily-course-heading">
+                <span class="category-index">01</span>
+                <div class="category-title"><h3 id="daily-mains-title">Platos de fondo</h3></div>
+                <span class="category-count">{{ dailyMainProducts().length }} {{ dailyMainProducts().length === 1 ? 'opción' : 'opciones' }}</span>
+              </div>
+              @if (dailyMainProducts().length) {
+              <div class="product-grid daily-options">
+                @for (product of dailyMainProducts(); track product.id) {
+                  <app-product-card class="daily-option" [product]="product" [quantity]="dailyMainCounts().get(product.id) ?? 0" statusLabel="En tu menú" addContext="al menú del día" [addDisabled]="dailyDrafts().length >= 99" (added)="addDailyMain($event.id)" (decreased)="decreaseDailyMain($event.id)" />
                 }
               </div>
+              } @else {
+                <div class="daily-no-results"><strong>No encontramos ese plato</strong><button type="button" (click)="dailySearchTerm.set('')">Ver todos los fondos</button></div>
+              }
             </section>
             <section class="daily-course daily-builder" aria-labelledby="daily-builder-title">
-              <div class="daily-course-heading"><span>02</span><h3 id="daily-builder-title">Arma tus menús</h3><small>{{ preparedDailyMenus().length }} {{ preparedDailyMenus().length === 1 ? 'fondo' : 'fondos' }}</small></div>
+              <div class="category-heading daily-course-heading">
+                <span class="category-index">02</span>
+                <div class="category-title"><h3 id="daily-builder-title">Arma tus menús</h3></div>
+              </div>
               @if (preparedDailyMenus().length) {
                 <div class="daily-drafts">
                   @for (draft of preparedDailyMenus(); track draft.id; let i = $index) {
                     <div class="daily-draft">
                       <div class="daily-draft-heading"><span>MENÚ {{ i + 1 }}</span><button type="button" (click)="removeDailyDraft(draft.id)" [attr.aria-label]="'Quitar menú ' + (i + 1)">Quitar</button></div>
-                      <div class="daily-draft-main"><strong>{{ draft.mainName }}</strong><span>{{ draft.available ? 'S/ ' + draft.price : 'No disponible' }}</span></div>
-                      <label [for]="'daily-starter-' + draft.id">Entrada para este fondo</label>
-                      <select [id]="'daily-starter-' + draft.id" [ngModel]="draft.starterId ?? ''" (ngModelChange)="setDailyStarter(draft.id, $event)">
-                        <option value="" disabled>Elige una entrada</option>
-                        @for (starter of dailyStarters(); track starter.id) { <option [value]="starter.id">{{ starter.name }}</option> }
-                      </select>
+                      <div class="daily-draft-main">
+                        @if (draft.mainImage) { <img [src]="draft.mainImage" [alt]="draft.mainName" loading="lazy"> }
+                        <strong>{{ draft.mainName }}</strong><span>{{ draft.available ? 'S/ ' + draft.price : 'No disponible' }}</span>
+                      </div>
+                      <span class="daily-starter-label">Entrada para este fondo</span>
+                      <button type="button" class="daily-starter-toggle" [attr.aria-expanded]="openStarterPickerId() === draft.id" [attr.aria-controls]="'daily-starters-' + draft.id" (click)="toggleStarterPicker(draft.id)">
+                        @if (draft.starterImage) { <img [src]="draft.starterImage" [alt]="draft.starterName ?? 'Entrada elegida'" loading="lazy"> }
+                        <span>{{ draft.starterName ?? 'Elige una entrada' }}</span><span aria-hidden="true">⌄</span>
+                      </button>
+                      @if (openStarterPickerId() === draft.id) {
+                        <div class="daily-starter-options" [id]="'daily-starters-' + draft.id" [attr.aria-label]="'Entradas para el menú ' + (i + 1)">
+                          @for (starter of dailyStarters(); track starter.id) {
+                            <button type="button" class="daily-starter-option" [class.selected]="draft.starterId === starter.id" [attr.aria-pressed]="draft.starterId === starter.id" (click)="setDailyStarter(draft.id, starter.id)">
+                              @if (starter.image) { <img [src]="starter.image" [alt]="starter.name" loading="lazy"> }
+                              <span>{{ starter.name }}</span>
+                            </button>
+                          }
+                        </div>
+                      }
                     </div>
                   }
                 </div>

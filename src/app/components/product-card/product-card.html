@@ -3,13 +3,12 @@
     <div class="product-image-wrap">
       <img class="product-image" [src]="product().image" [alt]="product().imageAlt || product().name" loading="lazy">
       @if (product().badge) { <span class="badge">{{ product().badge }}</span> }
-      <span class="reference">Imagen referencial</span>
     </div>
   }
   <div class="product-copy">
     <div class="product-topline">
       <span>{{ product().categoryId === 'bebidas' ? 'Para acompañar' : 'La Estación 365' }}</span>
-      @if (quantity() > 0) { <span class="in-cart">En tu pedido</span> }
+      @if (quantity() > 0) { <span class="in-cart">{{ statusLabel() }}</span> }
     </div>
     <h3>{{ product().name }}</h3>
     @if (product().description) { <p>{{ product().description }}</p> }
@@ -22,10 +21,10 @@
         <div class="stepper" [attr.aria-label]="'Cantidad de ' + product().name">
           <button type="button" (click)="decreased.emit(product())" [attr.aria-label]="'Quitar una unidad de ' + product().name">−</button>
           <span aria-live="polite">{{ quantity() }}</span>
-          <button type="button" (click)="add()" [attr.aria-label]="'Agregar una unidad de ' + product().name">+</button>
+          <button type="button" [disabled]="addDisabled()" (click)="add()" [attr.aria-label]="'Agregar una unidad de ' + product().name">+</button>
         </div>
       } @else {
-        <button type="button" class="add-button" [class.added]="justAdded()" (click)="add()" [attr.aria-label]="'Agregar ' + product().name + ' al pedido'">
+        <button type="button" class="add-button" [class.added]="justAdded()" [disabled]="addDisabled()" (click)="add()" [attr.aria-label]="'Agregar ' + product().name + ' ' + addContext()">
           <span>Agregar</span><span aria-hidden="true">+</span>
         </button>
       }

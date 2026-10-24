@@ -1,78 +1,11 @@
-import { createClient } from '@sanity/client';
-import { DestroyRef, inject, Injectable, signal } from '@angular/core';
-import { SANITY_CONFIG } from '../config/sanity.config';
+import { Injectable, signal } from '@angular/core';
 import { CATEGORIES, PRODUCTS } from '../data/menu.data';
-import { DAILY_MAINS, DAILY_STARTERS, DailyDish } from '../data/daily-menu.data';
-import { Category, Product } from '../models/menu.models';
-
-interface SanityMenu {
-  ready: boolean;
-  categories: Category[];
-  products: Product[];
-  dailyDishes: (DailyDish & { course: 'starter' | 'main' })[];
-}
-
-const MENU_QUERY = `{
-  "ready": defined(*[_id == "menuSettings"][0]._id),
-  "categories": *[_type == "menuCategory"] | order(sortOrder asc, name asc) {
-    "id": _id, name, shortName, description, sortOrder, active
-  },
-  "products": *[_type == "menuProduct"] | order(sortOrder asc, name asc) {
-    "id": _id, "categoryId": category->_id, name, price, description,
-    "image": coalesce(image.asset->url, fallbackImage),
-    imageAlt, featured, badge, active, sortOrder
-  },
-  "dailyDishes": *[_type == "dailyMenuDish"] | order(sortOrder asc, name asc) {
-    "id": coalesce(key, _id), name, course, price, active, sortOrder
-  }
-}`;
-
-const client = createClient({ ...SANITY_CONFIG, useCdn: false, perspective: 'published' });
+import { DAILY_MAINS, DAILY_STARTERS } from '../data/daily-menu.data';
 
 @Injectable({ providedIn: 'root' })
 export class MenuService {
-  private readonly destroyRef = inject(DestroyRef);
-  private loading = false;
-  readonly categories = signal<Category[]>(CATEGORIES);
-  readonly products = signal<Product[]>(PRODUCTS);
-  readonly dailyStarters = signal<DailyDish[]>(DAILY_STARTERS);
-  readonly dailyMains = signal<DailyDish[]>(DAILY_MAINS);
-
-  constructor() {
-    void this.refresh();
-    const interval = window.setInterval(() => void this.refresh(), 60_000);
-    const onVisible = () => { if (document.visibilityState === 'visible') void this.refresh(); };
-    document.addEventListener('visibilitychange', onVisible);
-    this.destroyRef.onDestroy(() => {
-      window.clearInterval(interval);
-      document.removeEventListener('visibilitychange', onVisible);
-    });
-  }
-
-  async refresh(): Promise<void> {
-    if (this.loading) return;
-    this.loading = true;
-    try {
-      const menu = await client.fetch<SanityMenu>(MENU_QUERY);
-      // La carta local permanece visible hasta que se importe el menú inicial.
-      if (!menu.ready) return;
-      this.categories.set(menu.categories.filter(category => typeof category.id === 'string' && typeof category.name === 'string'));
-      this.products.set(menu.products.filter(product =>
-        typeof product.id === 'string' && typeof product.categoryId === 'string' &&
-        typeof product.name === 'string' &&
-        (product.price === null || (typeof product.price === 'number' && Number.isFinite(product.price) && product.price >= 0))
-      ));
-      if (Array.isArray(menu.dailyDishes) && menu.dailyDishes.length) {
-        const dishes = menu.dailyDishes.filter(dish => typeof dish.id === 'string' && typeof dish.name === 'string' &&
-          (dish.course === 'starter' || dish.course === 'main') && dish.active !== false);
-        this.dailyStarters.set(dishes.filter(dish => dish.course === 'starter'));
-        this.dailyMains.set(dishes.filter(dish => dish.course === 'main' && typeof dish.price === 'number' &&
-          Number.isFinite(dish.price) && dish.price >= 0));
-      }
-    } catch (error) {
-      console.warn('No se pudo actualizar la carta desde Sanity. Se conserva la última versión cargada.', error);
-    } finally {
-      this.loading = false;
-    }
-  }
+  readonly categories = signal(CATEGORIES);
+  readonly products = signal(PRODUCTS);
+  readonly dailyStarters = signal(DAILY_STARTERS.filter(dish => dish.active !== false));
+  readonly dailyMains = signal(DAILY_MAINS.filter(dish => dish.active !== false));
 }

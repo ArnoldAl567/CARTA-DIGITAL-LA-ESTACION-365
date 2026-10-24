@@ -31,6 +31,7 @@ describe('App', () => {
     expect(sectionButtons[0].textContent).toContain('Menú del día');
     expect(sectionButtons[0].getAttribute('aria-pressed')).toBe('true');
     expect(compiled.querySelector('.daily-menu')).not.toBeNull();
+    expect(compiled.textContent).not.toContain('Imagen referencial');
   });
 
   it('adds the same main twice with a different starter for each serving', async () => {
@@ -42,18 +43,36 @@ describe('App', () => {
     expect(compiled.textContent).toContain('Tallarín verde con chuleta');
     expect(compiled.querySelectorAll('.daily-option').length).toBe(13);
     expect(compiled.querySelector('.menu-controls')).toBeNull();
-    const tallarin = Array.from(compiled.querySelectorAll<HTMLButtonElement>('.daily-option'))
-      .find(button => button.textContent?.includes('Tallarín verde con chuleta'))!;
-    tallarin.click();
-    tallarin.click();
+    const tallarin = Array.from(compiled.querySelectorAll<HTMLElement>('.daily-option'))
+      .find(card => card.textContent?.includes('Tallarín verde con chuleta'))!;
+    expect(tallarin.querySelector('.product-card')).not.toBeNull();
+    tallarin.querySelector<HTMLButtonElement>('.add-button')?.click();
     fixture.detectChanges();
-    const selects = compiled.querySelectorAll<HTMLSelectElement>('.daily-draft select');
-    expect(selects.length).toBe(2);
+    expect(tallarin.querySelector('.in-cart')?.textContent).toContain('En tu menú');
+    tallarin.querySelectorAll<HTMLButtonElement>('.stepper button')[1].click();
+    fixture.detectChanges();
+    expect(tallarin.querySelector('.stepper span')?.textContent).toContain('2');
+    tallarin.querySelectorAll<HTMLButtonElement>('.stepper button')[0].click();
+    fixture.detectChanges();
+    expect(tallarin.querySelector('.stepper span')?.textContent).toContain('1');
+    tallarin.querySelectorAll<HTMLButtonElement>('.stepper button')[1].click();
+    fixture.detectChanges();
+    expect(tallarin.querySelector('.stepper span')?.textContent).toContain('2');
+    expect(compiled.querySelectorAll('.daily-draft').length).toBe(2);
+    expect(compiled.querySelectorAll('.daily-option .product-image').length).toBe(13);
     expect(compiled.querySelector<HTMLButtonElement>('.daily-selection button')?.disabled).toBeTrue();
-    selects[0].value = 'ceviche';
-    selects[0].dispatchEvent(new Event('change', { bubbles: true }));
-    selects[1].value = 'sopa-semola';
-    selects[1].dispatchEvent(new Event('change', { bubbles: true }));
+    const chooseStarter = (draftIndex: number, name: string) => {
+      const draft = compiled.querySelectorAll<HTMLElement>('.daily-draft')[draftIndex];
+      const option = Array.from(draft.querySelectorAll<HTMLButtonElement>('.daily-starter-option'))
+        .find(button => button.textContent?.includes(name));
+      option?.click();
+      fixture.detectChanges();
+    };
+    chooseStarter(1, 'Sopa de sémola');
+    compiled.querySelectorAll<HTMLButtonElement>('.daily-starter-toggle')[0].click();
+    fixture.detectChanges();
+    expect(compiled.querySelectorAll('.daily-starter-option img').length).toBe(7);
+    chooseStarter(0, 'Ceviche');
     fixture.detectChanges();
     compiled.querySelector<HTMLButtonElement>('.daily-selection button')?.click();
     fixture.detectChanges();
@@ -69,5 +88,34 @@ describe('App', () => {
     fixture.detectChanges();
     expect(compiled.querySelector('.daily-menu')).toBeNull();
     expect(compiled.querySelector('.menu-controls')).not.toBeNull();
+    expect(compiled.textContent).not.toContain('Imagen referencial');
+    compiled.querySelector<HTMLButtonElement>('.product-grid app-product-card .add-button')?.click();
+    fixture.detectChanges();
+    expect(compiled.querySelector('.product-grid app-product-card .in-cart')?.textContent).toContain('En tu pedido');
+  });
+
+  it('filters daily mains without losing a menu being prepared', async () => {
+    const fixture = TestBed.createComponent(App);
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const compiled = fixture.nativeElement as HTMLElement;
+    const search = compiled.querySelector<HTMLInputElement>('.daily-search input')!;
+    expect(compiled.querySelector('.daily-intro')).toBeNull();
+    search.value = 'tallarin';
+    search.dispatchEvent(new Event('input', { bubbles: true }));
+    fixture.detectChanges();
+    expect(compiled.querySelectorAll('.daily-option').length).toBe(1);
+    expect(compiled.querySelector('.daily-option')?.textContent).toContain('Tallarín verde con chuleta');
+    compiled.querySelector<HTMLButtonElement>('.daily-option .add-button')?.click();
+    fixture.detectChanges();
+    search.value = 'plato inexistente';
+    search.dispatchEvent(new Event('input', { bubbles: true }));
+    fixture.detectChanges();
+    expect(compiled.querySelector('.daily-no-results')).not.toBeNull();
+    expect(compiled.querySelectorAll('.daily-draft').length).toBe(1);
+    compiled.querySelector<HTMLButtonElement>('.daily-no-results button')?.click();
+    fixture.detectChanges();
+    expect(compiled.querySelectorAll('.daily-option').length).toBe(13);
+    expect(compiled.querySelectorAll('.daily-draft').length).toBe(1);
   });
 });

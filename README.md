@@ -1,48 +1,27 @@
 # La Estación 365 — carta digital
 
-Carta pública creada con Angular. Incluye 46 productos a la carta y una sección de menú del día con 7 entradas y 13 fondos, además de búsqueda, carrito y preparación del pedido por WhatsApp.
+Carta pública creada con Angular. Incluye platos a la carta, menú del día, búsqueda, carrito y preparación del pedido por WhatsApp. Los datos y las imágenes se sirven desde este proyecto; no hay conexión a un CMS, API ni base de datos.
 
-## Estado actual
-
-La carta pública está hecha en Angular y consulta el proyecto Sanity **carta-digital** (`10djriog`), dataset público `production`. No hay API, Laravel ni PostgreSQL propios. La conexión usa el cliente oficial sin token en el navegador.
-
-El dataset ya contiene las 6 categorías y los 46 productos iniciales. Sanity controla los productos, precios, imágenes y disponibilidad. La carta consulta cambios al abrirse, al volver a la pestaña y cada minuto; no requiere volver a publicar Angular por cada cambio.
-
-El menú del día se muestra por ahora desde los datos locales de respaldo y aparece primero al abrir la carta. El cliente añade uno o varios fondos, incluso el mismo fondo varias veces, y elige una entrada distinta para cada ración. Luego agrega todas las combinaciones al carrito y revisa el pedido completo. El precio provisional de S/ 12 o S/ 14 se toma de cada fondo. Cada combinación se agrega como un producto independiente al carrito. No se han generado imágenes para estos platos. La imagen de referencia menciona S/ 1 por envase para llevar; ese importe no está incluido en el total porque falta confirmar cuántos envases corresponden a cada pedido.
-
-## Desarrollo y publicación
+## Ejecutar el proyecto
 
 Requiere Node.js y npm. En la raíz del proyecto:
 
 1. `npm install`
-2. `npm start` y abre `http://localhost:4200/`
+2. `npm start` y abre `http://127.0.0.1:4200/`
 3. `npm run build` para generar el sitio estático en `dist/sabor-a-mar/browser/`
+4. `npm test -- --watch=false --browsers=ChromeHeadless` para ejecutar las pruebas
 
-El sitio compilado puede publicarse en un alojamiento para archivos estáticos. No necesita un proceso PHP ni una base de datos.
+El sitio compilado puede publicarse en un alojamiento para archivos estáticos. Los cambios de la carta requieren volver a compilar y publicar el frontend.
 
-## Preparar el panel de Sanity
+## Editar platos y disponibilidad
 
-El panel de edición está publicado en **https://la-estacion-365-carta.sanity.studio/**. Inicia sesión con GitHub y abre **Plato o bebida** para cambiar la carta. Su código está en `studio/` y utiliza el mismo proyecto y dataset. Para ejecutarlo o volver a publicarlo desde esa carpeta:
+- **Platos a la carta y bebidas:** modifica `src/app/data/menu.data.ts`. Cada producto tiene nombre, precio, imagen y categoría. Para ocultar un producto, establece `active: false`; para mostrarlo, usa `active: true` o elimina esa propiedad. Sus imágenes están en `public/images/menu/`.
+- **Menú del día:** modifica `src/app/data/daily-menu.data.ts`. Las entradas están en `DAILY_STARTERS` y los fondos en `DAILY_MAINS`. Cada fondo tiene su precio; se puede ocultar con `active: false`. Sus imágenes están en `public/images/daily/`.
+- Las fotografías del menú del día son ilustrativas. Sustitúyelas por fotografías reales del restaurante cuando estén disponibles.
 
-1. `npm install`
-2. `npx sanity login` e inicia sesión con la cuenta propietaria del proyecto.
-3. `npm run seed:export` para regenerar `seed/menu.ndjson` a partir de la carta local.
-4. La importación inicial ya se realizó. Solo para recrear documentos faltantes, ejecuta `npx sanity datasets import seed/menu.ndjson --dataset production --missing`.
-5. `npm run dev` para abrir el panel local en `http://localhost:3333/`, o `npm run deploy` para actualizar el panel publicado.
+Los precios S/ 12 y S/ 14 del menú del día y los precios de bebidas son provisionales: confírmalos con el restaurante antes de publicar. La referencia del menú menciona S/ 1 por envase para llevar; no está incluido en el total porque falta definir cuántos envases corresponden a cada pedido.
 
-En el panel, abre **Plato o bebida**, cambia el precio o desactiva **Disponible en la carta**, y pulsa **Publish**. También puedes subir una imagen nueva; mientras un producto no tenga imagen en Sanity, la carta usa su fotografía local. Los cambios publicados se reflejan en la carta sin otro despliegue.
-
-El esquema nuevo **Menú del día** permite cambiar entradas, fondos, precios y disponibilidad sin subir imágenes. Tras publicar esta versión del Studio e importar los 20 documentos preparados, Angular leerá esa sección desde Sanity. Para importar solo los documentos que aún no existen, ejecuta `npm run seed:export` y luego `npx sanity datasets import seed/menu.ndjson --dataset production --missing` desde `studio/`. Los precios iniciales del menú del día son provisionales; confírmalos con el restaurante antes de publicar la carta.
-
-Los orígenes CORS `http://localhost:4200` y `https://carta-digital-la-estacion365.vercel.app` están autorizados para leer el dataset **sin credenciales**. Si cambias el dominio público, añade su origen en Sanity → API → CORS origins, sin habilitar credenciales para la carta pública. Nunca pongas un token de escritura en Angular.
-
-## Editar el menú local de respaldo
-
-En `src/app/data/menu.data.ts`, modifica el `price` del producto en `MENU_ENTRIES`. Para retirarlo temporalmente de la carta, agrega `active: false`; quita esa propiedad o usa `active: true` para mostrarlo de nuevo. Las imágenes se encuentran en `public/images/menu/`. Los precios de bebidas son sugeridos: confirma con el restaurante el tamaño de cada presentación y el precio final antes de publicar.
-
-Este archivo sirve como respaldo si Sanity aún no tiene el menú inicial o no responde. Cuando el menú de Sanity está activo, cambiar el archivo local ya no modifica la carta pública. Los productos desactivados en Sanity no aparecen en la carta ni pueden permanecer en un carrito restaurado.
-
-Las opciones del menú del día y sus precios de respaldo están en `src/app/data/daily-menu.data.ts`. Se usan hasta que existan documentos de **Menú del día** en Sanity. Los cambios de precio y disponibilidad publicados allí se reflejarán al recargar la carta o en la siguiente actualización automática.
+El menú del día aparece primero al abrir la carta. Un buscador filtra los fondos por nombre, incluso si se escribe sin tildes. Los fondos tienen tarjetas con **Agregar** y controles **− cantidad +**. Cada ración permite elegir una entrada diferente. Al bajar la cantidad, se retira la última ración añadida de ese fondo. Después se agregan las combinaciones al carrito.
 
 ## Cambiar el número de WhatsApp
 
@@ -52,7 +31,3 @@ El contacto configurado actualmente es el **WhatsApp de IntegraTech: +51 902 586
 - `displayWhatsapp`: el mismo número con formato legible. Ejemplo: `+51 987 654 321`.
 
 Vuelve a compilar o publicar después del cambio y prueba un pedido. La carta prepara el mensaje; el cliente debe pulsar **Enviar** en WhatsApp. El pedido queda pendiente de confirmación.
-
-## Cambiar dirección y horarios
-
-El pie de página usa `addressLine1`, `addressLine2`, `mapsUrl`, `weekdayHours` y `weekendHours` de `BUSINESS_CONFIG` en `src/app/data/menu.data.ts`. Si cambia la dirección, actualiza también `mapsUrl` para que **Ver ubicación** abra el lugar correcto. Después, vuelve a publicar la carta.

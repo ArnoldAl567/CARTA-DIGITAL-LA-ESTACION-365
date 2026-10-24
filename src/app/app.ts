@@ -15,6 +15,7 @@ import { MenuService } from './services/menu.service';
 registerLocaleData(localeEsPe);
 
 interface DailyDraft { id: number; mainId: string; starterId: string | null; }
+const normalizeSearch = (value: string): string => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('es-PE');
 
 @Component({
   selector: 'app-root',
@@ -29,11 +30,28 @@ export class App {
   readonly currentYear = new Date().getFullYear();
   readonly dailyStarters = this.menu.dailyStarters;
   readonly dailyMains = this.menu.dailyMains;
+  readonly dailySearchTerm = signal('');
+  readonly filteredDailyMains = computed(() => {
+    const search = normalizeSearch(this.dailySearchTerm().trim());
+    return search ? this.dailyMains().filter(dish => normalizeSearch(dish.name).includes(search)) : this.dailyMains();
+  });
+  readonly dailyMainProducts = computed<Product[]>(() => this.filteredDailyMains()
+    .filter(dish => typeof dish.price === 'number')
+    .map(dish => ({ id: dish.id, categoryId: 'menu-dia', name: dish.name, price: dish.price!, image: dish.image, imageAlt: dish.name })));
   readonly activeSection = signal<'carta' | 'menu-dia'>('menu-dia');
   readonly dailyDrafts = signal<DailyDraft[]>([]);
+  readonly dailyMainCounts = computed(() => {
+    const counts = new Map<string, number>();
+    for (const draft of this.dailyDrafts()) counts.set(draft.mainId, (counts.get(draft.mainId) ?? 0) + 1);
+    return counts;
+  });
+  readonly openStarterPickerId = signal<number | null>(null);
   readonly preparedDailyMenus = computed(() => this.dailyDrafts().map(draft => {
     const main = this.dailyMains().find(dish => dish.id === draft.mainId);
-    return { ...draft, mainName: main?.name ?? 'Fondo no disponible', price: main?.price ?? null, available: !!main && main.price !== undefined };
+    const starter = this.dailyStarters().find(dish => dish.id === draft.starterId);
+    return { ...draft, mainName: main?.name ?? 'Fondo no disponible', mainImage: main?.image,
+      starterName: starter?.name, starterImage: starter?.image,
+      price: main?.price ?? null, available: !!main && main.price !== undefined };
   }));
   readonly dailyDraftTotal = computed(() => this.preparedDailyMenus().reduce((sum, draft) => sum + (draft.price ?? 0), 0));
   readonly canAddDailyMenus = computed(() => this.preparedDailyMenus().length > 0 &&
@@ -66,14 +84,25 @@ export class App {
   addProduct(product: Product): void { this.cart.add(product); }
   addDailyMain(mainId: string): void {
     if (this.dailyDrafts().length >= 99 || !this.dailyMains().some(dish => dish.id === mainId)) return;
-    this.dailyDrafts.update(drafts => [...drafts, { id: this.nextDailyDraftId++, mainId, starterId: null }]);
+    const id = this.nextDailyDraftId++;
+    this.dailyDrafts.update(drafts => [...drafts, { id, mainId, starterId: null }]);
+    this.openStarterPickerId.set(id);
+  }
+  decreaseDailyMain(mainId: string): void {
+    const draft = [...this.dailyDrafts()].reverse().find(item => item.mainId === mainId);
+    if (draft) this.removeDailyDraft(draft.id);
+  }
+  toggleStarterPicker(draftId: number): void {
+    this.openStarterPickerId.update(current => current === draftId ? null : draftId);
   }
   setDailyStarter(draftId: number, starterId: string): void {
     if (!this.dailyStarters().some(dish => dish.id === starterId)) return;
     this.dailyDrafts.update(drafts => drafts.map(draft => draft.id === draftId ? { ...draft, starterId } : draft));
+    this.openStarterPickerId.set(null);
   }
   removeDailyDraft(draftId: number): void {
     this.dailyDrafts.update(drafts => drafts.filter(draft => draft.id !== draftId));
+    if (this.openStarterPickerId() === draftId) this.openStarterPickerId.set(null);
   }
   addDailyMenus(): void {
     if (!this.canAddDailyMenus()) return;
@@ -82,6 +111,7 @@ export class App {
       if (product) this.cart.add(product);
     }
     this.dailyDrafts.set([]);
+    this.openStarterPickerId.set(null);
   }
   decreaseProduct(product: Product): void { this.cart.setQuantity(product.id, (this.quantities().get(product.id) ?? 0) - 1); }
   scrollToMenu(): void {
