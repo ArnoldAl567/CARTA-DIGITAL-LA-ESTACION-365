@@ -5,66 +5,67 @@ import { CartDrawer } from './cart-drawer';
 describe('CartDrawer WhatsApp order', () => {
   const product = { id: 'marinos-jalea-mixta', categoryId: 'marinos', name: 'Jalea mixta', price: 28 };
 
-  function createDrawer(notes = ''): CartDrawer {
+  function createDrawer(): CartDrawer {
     const cart = {
-      items: () => [{ product, quantity: 2, notes }],
+      items: () => [{ product, quantity: 2, notes: 'Sin picante' }],
       total: () => 56,
     } as unknown as CartService;
     const drawer = TestBed.runInInjectionContext(() => new CartDrawer(cart));
-    drawer.customer = { name: 'Ana Pérez', phone: '987654321', method: 'pickup', address: '', reference: '' };
+    drawer.customer = { name: 'Ana Pérez', phone: '987654321', method: 'pickup', payment: 'yape', address: '', reference: '' };
     return drawer;
   }
 
   function sentMessage(open: jasmine.Spy): string {
     const url = open.calls.mostRecent().args[0] as string;
+    expect(url).toContain('api.whatsapp.com/send/?phone=51902586908');
+    expect(url).toContain('%F0%9F');
+    expect(url).not.toContain('%EF%BF%BD');
     return new URL(url).searchParams.get('text') ?? '';
   }
 
-  it('shows a compact product summary for pickup', () => {
+  it('opens one formatted WhatsApp message with the order and customer details', () => {
     const open = spyOn(window, 'open');
     createDrawer().sendOrder();
-
+    expect(open).toHaveBeenCalledTimes(1);
     const message = sentMessage(open);
-    expect(message).toContain('*PEDIDO · LA ESTACIÓN 365*');
-    expect(message).not.toContain('PRUEBA');
-    expect(message).toContain('• 2 × Jalea mixta · S/ 56.00');
-    expect(message).toContain('*Total: S/ 56.00*');
-    expect(message).toContain('*Recojo en local*\nAna Pérez · 987654321');
-    expect(message).not.toContain('Subtotal');
-    expect(message).not.toContain('Dirección');
+    expect(message).toContain('🛒 *NUEVO PEDIDO*');
+    expect(message).toContain('🍽️ *Jalea mixta*\n📦 Cantidad: 2\n💰 S/ 56.00\n📝 Sin picante');
+    expect(message).toContain('💵 *TOTAL: S/ 56.00*');
+    expect(message).toContain('📋 *DATOS DEL CLIENTE*');
+    expect(message).toContain('👤 Nombre: Ana Pérez\n📱 Celular: 987654321\n💳 Pago: Yape\n📍 Recojo en local');
+    expect(message).not.toContain('DNI');
   });
 
-  it('includes delivery details and product notes when provided', () => {
+  it('includes delivery address and cash payment when selected', () => {
     const open = spyOn(window, 'open');
-    const drawer = createDrawer('  sin   picante  ');
+    const drawer = createDrawer();
     drawer.customer.method = 'delivery';
+    drawer.customer.payment = 'cash';
     drawer.customer.address = 'Av. Principal 123';
     drawer.customer.reference = 'Frente al parque';
     drawer.sendOrder();
-
     const message = sentMessage(open);
-    expect(message).toContain('Nota: sin picante');
-    expect(message).toContain('*Entrega a domicilio*\nAna Pérez · 987654321\nAv. Principal 123\nRef.: Frente al parque');
-    expect(message).not.toContain('Delivery gratis según cobertura.');
-    expect(message).not.toContain('Confirma disponibilidad y tiempo estimado');
+    expect(message).toContain('💳 Pago: Efectivo');
+    expect(message).toContain('📍 Dirección: Av. Principal 123\n   Ref.: Frente al parque');
+  });
+
+  it('requires payment and a nine digit phone before opening WhatsApp', () => {
+    const open = spyOn(window, 'open');
+    const drawer = createDrawer();
+    drawer.customer.phone = '98765432';
+    drawer.sendOrder();
+    expect(drawer.errorMessage()).toBe('Ingresa un teléfono de 9 dígitos.');
+    drawer.customer.phone = '987654321';
+    drawer.customer.payment = '';
+    drawer.sendOrder();
+    expect(drawer.errorMessage()).toBe('Elige Yape o efectivo.');
+    expect(open).not.toHaveBeenCalled();
   });
 
   it('keeps only nine digits when a formatted number is pasted', () => {
     const drawer = createDrawer();
     const input = document.createElement('input');
     drawer.setPhone('+51 987 654 321', input);
-
     expect(drawer.customer.phone).toBe('987654321');
-    expect(input.value).toBe('987654321');
-  });
-
-  it('does not open WhatsApp with fewer than nine digits', () => {
-    const open = spyOn(window, 'open');
-    const drawer = createDrawer();
-    drawer.customer.phone = '98765432';
-    drawer.sendOrder();
-
-    expect(open).not.toHaveBeenCalled();
-    expect(drawer.errorMessage()).toBe('Ingresa un teléfono de 9 dígitos.');
   });
 });

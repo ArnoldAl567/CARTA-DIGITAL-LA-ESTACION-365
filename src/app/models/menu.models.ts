@@ -4,4 +4,5 @@ export interface Category { id: CategoryId; name: string; shortName: string; des
 export interface Product { id: string; categoryId: CategoryId; name: string; price: number | null; description?: string; image?: string | null; imageAlt?: string; featured?: boolean; badge?: string; active?: boolean; sortOrder?: number; }
 export interface CartItem { product: Product; quantity: number; notes: string; }
 export type DeliveryMethod = 'pickup' | 'delivery';
-export interface CustomerDetails { name: string; phone: string; method: DeliveryMethod; address: string; reference: string; }
+export type PaymentMethod = 'yape' | 'cash' | '';
+export interface CustomerDetails { name: string; phone: string; method: DeliveryMethod; payment: PaymentMethod; address: string; reference: string; }

@@ -19,7 +19,7 @@ export class CartDrawer implements OnChanges, OnDestroy {
   readonly errorMessage = signal('');
   readonly config = BUSINESS_CONFIG;
 
-  customer: CustomerDetails = { name: '', phone: '', method: 'pickup', address: '', reference: '' };
+  customer: CustomerDetails = { name: '', phone: '', method: 'pickup', payment: '', address: '', reference: '' };
   private previousFocus: HTMLElement | null = null;
   private previousOverflow = '';
 
@@ -65,6 +65,7 @@ export class CartDrawer implements OnChanges, OnDestroy {
     this.clearError();
   }
   addressInvalid(): boolean { return this.submitted() && this.customer.method === 'delivery' && this.customer.address.trim().length < 6; }
+  paymentInvalid(): boolean { return this.submitted() && !this.customer.payment; }
   clearError(): void { this.errorMessage.set(''); }
 
   sendOrder(): void {
@@ -73,20 +74,34 @@ export class CartDrawer implements OnChanges, OnDestroy {
     if (!this.cart.items().length) { this.errorMessage.set('Agrega al menos un plato para continuar.'); return; }
     if (this.nameInvalid()) { this.errorMessage.set('Ingresa tu nombre para continuar.'); document.getElementById('customer-name')?.focus(); return; }
     if (this.phoneInvalid()) { this.errorMessage.set('Ingresa un teléfono de 9 dígitos.'); document.getElementById('customer-phone')?.focus(); return; }
+    if (this.paymentInvalid()) { this.errorMessage.set('Elige Yape o efectivo.'); document.getElementById('payment-yape')?.focus(); return; }
     if (this.addressInvalid()) { this.errorMessage.set('Ingresa la dirección de entrega.'); document.getElementById('customer-address')?.focus(); return; }
-
     const clean = (value: string) => value.trim().replace(/\s+/g, ' ');
     const products = this.cart.items().map(item => {
-      const price = item.product.price ?? 0;
-      const subtotal = price * item.quantity;
-      return `• ${item.quantity} × ${item.product.name} · S/ ${subtotal.toFixed(2)}${clean(item.notes) ? `\n  Nota: ${clean(item.notes)}` : ''}`;
-    }).join('\n');
-    const contact = `${clean(this.customer.name)} · ${clean(this.customer.phone)}`;
-    const delivery = this.customer.method === 'delivery'
-      ? `*Entrega a domicilio*\n${contact}\n${clean(this.customer.address)}${clean(this.customer.reference) ? `\nRef.: ${clean(this.customer.reference)}` : ''}`
-      : `*Recojo en local*\n${contact}`;
-    const title = `*PEDIDO · ${this.config.name}*`;
-    const message = `${title}\n\n*Productos*\n${products}\n\n*Total: S/ ${this.cart.total().toFixed(2)}*\n\n${delivery}`;
-    window.open(`https://wa.me/${this.config.whatsapp}?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
+      const subtotal = (item.product.price ?? 0) * item.quantity;
+      return [
+        `🍽️ *${clean(item.product.name)}*`,
+        `📦 Cantidad: ${item.quantity}`,
+        `💰 S/ ${subtotal.toFixed(2)}`,
+        ...(clean(item.notes) ? [`📝 ${clean(item.notes)}`] : []),
+      ].join('\n');
+    }).join('\n\n');
+    const location = this.customer.method === 'delivery'
+      ? `📍 Dirección: ${clean(this.customer.address)}${clean(this.customer.reference) ? `\n   Ref.: ${clean(this.customer.reference)}` : ''}`
+      : '📍 Recojo en local';
+    const message = [
+      '🛒 *NUEVO PEDIDO*',
+      '',
+      products,
+      '────────────────────',
+      `💵 *TOTAL: S/ ${this.cart.total().toFixed(2)}*`,
+      '',
+      '📋 *DATOS DEL CLIENTE*',
+      `👤 Nombre: ${clean(this.customer.name)}`,
+      `📱 Celular: ${this.customer.phone}`,
+      `💳 Pago: ${this.customer.payment === 'yape' ? 'Yape' : 'Efectivo'}`,
+      location,
+    ].join('\n');
+    window.open(`https://api.whatsapp.com/send/?phone=${this.config.whatsapp}&text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
   }
 }

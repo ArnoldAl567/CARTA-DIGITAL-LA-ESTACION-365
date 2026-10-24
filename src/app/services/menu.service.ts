@@ -2,12 +2,14 @@ import { createClient } from '@sanity/client';
 import { DestroyRef, inject, Injectable, signal } from '@angular/core';
 import { SANITY_CONFIG } from '../config/sanity.config';
 import { CATEGORIES, PRODUCTS } from '../data/menu.data';
+import { DAILY_MAINS, DAILY_STARTERS, DailyDish } from '../data/daily-menu.data';
 import { Category, Product } from '../models/menu.models';
 
 interface SanityMenu {
   ready: boolean;
   categories: Category[];
   products: Product[];
+  dailyDishes: (DailyDish & { course: 'starter' | 'main' })[];
 }
 
 const MENU_QUERY = `{
@@ -19,6 +21,9 @@ const MENU_QUERY = `{
     "id": _id, "categoryId": category->_id, name, price, description,
     "image": coalesce(image.asset->url, fallbackImage),
     imageAlt, featured, badge, active, sortOrder
+  },
+  "dailyDishes": *[_type == "dailyMenuDish"] | order(sortOrder asc, name asc) {
+    "id": coalesce(key, _id), name, course, price, active, sortOrder
   }
 }`;
 
@@ -30,6 +35,8 @@ export class MenuService {
   private loading = false;
   readonly categories = signal<Category[]>(CATEGORIES);
   readonly products = signal<Product[]>(PRODUCTS);
+  readonly dailyStarters = signal<DailyDish[]>(DAILY_STARTERS);
+  readonly dailyMains = signal<DailyDish[]>(DAILY_MAINS);
 
   constructor() {
     void this.refresh();
@@ -55,6 +62,13 @@ export class MenuService {
         typeof product.name === 'string' &&
         (product.price === null || (typeof product.price === 'number' && Number.isFinite(product.price) && product.price >= 0))
       ));
+      if (Array.isArray(menu.dailyDishes) && menu.dailyDishes.length) {
+        const dishes = menu.dailyDishes.filter(dish => typeof dish.id === 'string' && typeof dish.name === 'string' &&
+          (dish.course === 'starter' || dish.course === 'main') && dish.active !== false);
+        this.dailyStarters.set(dishes.filter(dish => dish.course === 'starter'));
+        this.dailyMains.set(dishes.filter(dish => dish.course === 'main' && typeof dish.price === 'number' &&
+          Number.isFinite(dish.price) && dish.price >= 0));
+      }
     } catch (error) {
       console.warn('No se pudo actualizar la carta desde Sanity. Se conserva la última versión cargada.', error);
     } finally {

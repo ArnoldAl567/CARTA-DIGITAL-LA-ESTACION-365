@@ -1,5 +1,6 @@
 import { computed, effect, inject, Injectable, signal } from '@angular/core';
 import { CartItem, Product } from '../models/menu.models';
+import { dailyMenuProductById } from '../data/daily-menu.data';
 import { MenuService } from './menu.service';
 
 const STORAGE_KEY = 'la-estacion-365-cart-v1';
@@ -19,7 +20,8 @@ export class CartService {
     effect(() => {
       const products = this.menu.products();
       this.items.update(items => items.flatMap(item => {
-        const product = products.find(current => current.id === item.product.id);
+        const product = products.find(current => current.id === item.product.id) ??
+          dailyMenuProductById(item.product.id, this.menu.dailyStarters(), this.menu.dailyMains());
         return product && product.price !== null && product.active !== false ? [{ ...item, product }] : [];
       }));
     });
@@ -49,7 +51,8 @@ export class CartService {
       return parsed.flatMap((entry: unknown): CartItem[] => {
         if (!entry || typeof entry !== 'object') return [];
         const item = entry as Partial<CartItem>;
-        const product = this.menu.products().find(current => current.id === item.product?.id);
+        const product = this.menu.products().find(current => current.id === item.product?.id) ??
+          dailyMenuProductById(item.product?.id ?? '', this.menu.dailyStarters(), this.menu.dailyMains());
         if (!product || product.price === null) return [];
         const quantity = Math.min(99, Math.max(1, Math.trunc(Number(item.quantity) || 1)));
         return [{ product, quantity, notes: typeof item.notes === 'string' ? item.notes.slice(0, 100) : '' }];

@@ -12,3 +12,6 @@
 @media (max-width: 560px) { .drawer-header { padding: 19px 18px; }.drawer-header h2 { font-size: 2.3rem; }.drawer-body { padding: 22px 17px 24px; }.drawer-footer { padding-inline: 18px; }.field-grid { grid-template-columns: 1fr; }.method-options label { padding: 10px 8px; }.cart-item { grid-template-columns: 65px minmax(0,1fr); gap: 10px; }.cart-item > img { width: 65px; height: 65px; }.item-title h4 { font-size: .95rem; }.method-options strong { font-size: .68rem; } }
 @media (max-width: 360px) { .method-options { grid-template-columns: 1fr; }.method-options label { min-height: 56px; } }
 @media (prefers-reduced-motion: reduce) { .backdrop, .drawer, .delivery-fields { animation: none; } }
+.payment-fieldset { margin: 18px 0 0; }
+.payment-options label { min-height: 48px; align-items: center; }
+.payment-options input { margin-top: 0; }

@@ -2,6 +2,7 @@ import {defineConfig} from 'sanity'
 import {structureTool} from 'sanity/structure'
 import {menuCategory} from './schemaTypes/menuCategory'
 import {menuProduct} from './schemaTypes/menuProduct'
+import {dailyMenuDish} from './schemaTypes/dailyMenuDish'
 
 export default defineConfig({
   name: 'la-estacion-365',
@@ -9,5 +10,5 @@ export default defineConfig({
   projectId: '10djriog',
   dataset: 'production',
   plugins: [structureTool()],
-  schema: {types: [menuCategory, menuProduct]},
+  schema: {types: [menuCategory, menuProduct, dailyMenuDish]},
 })

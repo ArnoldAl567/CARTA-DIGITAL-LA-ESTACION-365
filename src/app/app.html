@@ -11,6 +11,12 @@
     <div class="menu-shell">
       <h2 class="visually-hidden">La carta</h2>
 
+      <div class="menu-section-picker" role="group" aria-label="Tipo de carta">
+        <button type="button" [class.selected]="activeSection() === 'menu-dia'" [attr.aria-pressed]="activeSection() === 'menu-dia'" (click)="activeSection.set('menu-dia')">Menú del día</button>
+        <button type="button" [class.selected]="activeSection() === 'carta'" [attr.aria-pressed]="activeSection() === 'carta'" (click)="activeSection.set('carta')">Platos a la carta</button>
+      </div>
+
+      @if (activeSection() === 'carta') {
       <div class="menu-controls">
         <label class="search-box">
           <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
@@ -54,6 +60,75 @@
           <p>Prueba con otra palabra o revisa la carta completa.</p>
           <button type="button" (click)="searchTerm.set(''); selectCategory('all')">Ver toda la carta</button>
         </div>
+      }
+      } @else {
+        <section class="daily-menu" aria-labelledby="daily-menu-title">
+          <div class="daily-intro">
+            <div>
+              <span class="daily-kicker">LA ESTACIÓN 365</span>
+              <h2 id="daily-menu-title">Menú del día</h2>
+              <p>Añade los fondos que quieras y elige una entrada para cada uno.</p>
+            </div>
+            <div class="daily-price-note"><strong>S/ 12 · S/ 14</strong><span>Según el fondo elegido</span></div>
+          </div>
+          @if (dailyStarters().length && dailyMains().length) {
+          <div class="daily-columns">
+            <section class="daily-course" aria-labelledby="daily-mains-title">
+              <div class="daily-course-heading"><span>01</span><h3 id="daily-mains-title">Platos de fondo</h3><small>Puedes repetir</small></div>
+              <div class="daily-options">
+                @for (dish of dailyMains(); track dish.id) {
+                  <button type="button" class="daily-option" (click)="addDailyMain(dish.id)" [attr.aria-label]="'Añadir ' + dish.name + ' a tus menús'"><span>{{ dish.name }}</span><strong>S/ {{ dish.price }}</strong><span class="daily-check" aria-hidden="true">+</span></button>
+                }
+              </div>
+            </section>
+            <section class="daily-course daily-builder" aria-labelledby="daily-builder-title">
+              <div class="daily-course-heading"><span>02</span><h3 id="daily-builder-title">Arma tus menús</h3><small>{{ preparedDailyMenus().length }} {{ preparedDailyMenus().length === 1 ? 'fondo' : 'fondos' }}</small></div>
+              @if (preparedDailyMenus().length) {
+                <div class="daily-drafts">
+                  @for (draft of preparedDailyMenus(); track draft.id; let i = $index) {
+                    <div class="daily-draft">
+                      <div class="daily-draft-heading"><span>MENÚ {{ i + 1 }}</span><button type="button" (click)="removeDailyDraft(draft.id)" [attr.aria-label]="'Quitar menú ' + (i + 1)">Quitar</button></div>
+                      <div class="daily-draft-main"><strong>{{ draft.mainName }}</strong><span>{{ draft.available ? 'S/ ' + draft.price : 'No disponible' }}</span></div>
+                      <label [for]="'daily-starter-' + draft.id">Entrada para este fondo</label>
+                      <select [id]="'daily-starter-' + draft.id" [ngModel]="draft.starterId ?? ''" (ngModelChange)="setDailyStarter(draft.id, $event)">
+                        <option value="" disabled>Elige una entrada</option>
+                        @for (starter of dailyStarters(); track starter.id) { <option [value]="starter.id">{{ starter.name }}</option> }
+                      </select>
+                    </div>
+                  }
+                </div>
+                <div class="daily-selection">
+                  <div><strong>{{ preparedDailyMenus().length }} {{ preparedDailyMenus().length === 1 ? 'menú' : 'menús' }}</strong><span>Una entrada distinta para cada fondo, si deseas.</span></div>
+                  <strong class="daily-selection-price">S/ {{ dailyDraftTotal().toFixed(2) }}</strong>
+                  <button type="button" [disabled]="!canAddDailyMenus()" (click)="addDailyMenus()">Añadir al pedido <span aria-hidden="true">↗</span></button>
+                </div>
+              } @else {
+                <p class="daily-builder-empty">Pulsa <strong>+</strong> en un fondo para empezar. Puedes añadir el mismo plato más de una vez.</p>
+              }
+            </section>
+          </div>
+          @if (dailyCartItems().length) {
+            <section class="daily-added" aria-labelledby="daily-added-title">
+              <div class="daily-added-heading"><h3 id="daily-added-title">Menús en tu pedido</h3><strong>S/ {{ dailyCartTotal().toFixed(2) }}</strong></div>
+              <div class="daily-added-list">
+                @for (item of dailyCartItems(); track item.product.id) {
+                  <div class="daily-added-item">
+                    <div><strong>{{ item.product.name }}</strong><span>S/ {{ item.product.price }} c/u</span></div>
+                    <div class="daily-added-quantity" [attr.aria-label]="'Cantidad de ' + item.product.name">
+                      <button type="button" (click)="cart.setQuantity(item.product.id, item.quantity - 1)" [attr.aria-label]="'Quitar un menú de ' + item.product.name">−</button>
+                      <span>{{ item.quantity }}</span>
+                      <button type="button" (click)="cart.setQuantity(item.product.id, item.quantity + 1)" [attr.aria-label]="'Agregar un menú de ' + item.product.name">+</button>
+                    </div>
+                  </div>
+                }
+              </div>
+              <button class="daily-review" type="button" (click)="cartOpen.set(true)">Ver pedido completo <span aria-hidden="true">↗</span></button>
+            </section>
+          }
+          } @else {
+            <div class="daily-unavailable">El menú del día no está disponible por ahora.</div>
+          }
+        </section>
       }
     </div>
 

@@ -5,7 +5,7 @@
       <div>
         <span class="drawer-eyebrow">LA ESTACIÓN 365 / TU SELECCIÓN</span>
         <h2 id="cart-title">Mi pedido</h2>
-        <p id="cart-subtitle">Revisa tus platos antes de abrir WhatsApp.</p>
+        <p id="cart-subtitle">Revisa tu pedido antes de enviarlo por WhatsApp.</p>
       </div>
       <button id="close-cart" class="close" type="button" (click)="closed.emit()" aria-label="Cerrar pedido">×</button>
     </header>
@@ -58,6 +58,13 @@
             <div class="field"><label for="customer-name">Nombre completo <span aria-hidden="true">*</span></label><input id="customer-name" type="text" [(ngModel)]="customer.name" (ngModelChange)="clearError()" autocomplete="name" [attr.aria-invalid]="nameInvalid()" [class.invalid]="nameInvalid()" required>@if (nameInvalid()) { <small class="field-error">Ingresa al menos 2 caracteres.</small> }</div>
             <div class="field"><label for="customer-phone">Teléfono <span aria-hidden="true">*</span></label><input #phoneInput id="customer-phone" type="tel" [ngModel]="customer.phone" (ngModelChange)="setPhone($event, phoneInput)" autocomplete="tel-national" inputmode="numeric" pattern="[0-9]{9}" placeholder="Ej. 987654321" [attr.aria-invalid]="phoneInvalid()" [class.invalid]="phoneInvalid()" required>@if (phoneInvalid()) { <small class="field-error">Ingresa exactamente 9 dígitos.</small> }</div>
           </div>
+          <fieldset class="payment-fieldset">
+            <legend>Medio de pago <span aria-hidden="true">*</span></legend>
+            <div class="method-options payment-options">
+              <label [class.selected]="customer.payment === 'yape'"><input id="payment-yape" type="radio" name="payment" value="yape" [(ngModel)]="customer.payment" (ngModelChange)="clearError()"><span><strong>Yape</strong></span></label>
+              <label [class.selected]="customer.payment === 'cash'"><input type="radio" name="payment" value="cash" [(ngModel)]="customer.payment" (ngModelChange)="clearError()"><span><strong>Efectivo</strong></span></label>
+            </div>
+          </fieldset>
           @if (customer.method === 'delivery') {
             <div class="delivery-fields">
               <div class="field"><label for="customer-address">Dirección de entrega <span aria-hidden="true">*</span></label><input id="customer-address" type="text" [(ngModel)]="customer.address" (ngModelChange)="clearError()" autocomplete="street-address" placeholder="Calle, número y distrito" [attr.aria-invalid]="addressInvalid()" [class.invalid]="addressInvalid()" required>@if (addressInvalid()) { <small class="field-error">Completa tu dirección.</small> }</div>
@@ -71,10 +78,9 @@
     @if (cart.items().length) {
       <footer class="drawer-footer">
         <div class="total-row"><span>Total de productos</span><strong>{{ cart.total() | currency:'PEN':'symbol-narrow':'1.2-2':'es-PE' }}</strong></div>
-        @if (customer.method === 'delivery') { <p class="delivery-note">Delivery gratis. Confirma la cobertura por WhatsApp.</p> }
         @if (errorMessage()) { <p class="form-error" role="alert">{{ errorMessage() }}</p> }
-        <button class="whatsapp" type="button" (click)="sendOrder()">Continuar a WhatsApp <span aria-hidden="true">↗</span></button>
-        <p class="send-note">Revisa y envía el mensaje en WhatsApp. El pedido quedará pendiente de confirmación.</p>
+        <button class="whatsapp" type="button" (click)="sendOrder()">Enviar pedido por WhatsApp <span aria-hidden="true">↗</span></button>
+        <p class="send-note">Revisa el mensaje y pulsa enviar en WhatsApp.</p>
       </footer>
     }
   </aside>

@@ -1,12 +1,14 @@
 # La Estación 365 — carta digital
 
-Carta pública creada con Angular. Contiene 46 productos en 6 categorías, con una imagen distinta para cada ficha, búsqueda, carrito y preparación del pedido por WhatsApp.
+Carta pública creada con Angular. Incluye 46 productos a la carta y una sección de menú del día con 7 entradas y 13 fondos, además de búsqueda, carrito y preparación del pedido por WhatsApp.
 
 ## Estado actual
 
 La carta pública está hecha en Angular y consulta el proyecto Sanity **carta-digital** (`10djriog`), dataset público `production`. No hay API, Laravel ni PostgreSQL propios. La conexión usa el cliente oficial sin token en el navegador.
 
 El dataset ya contiene las 6 categorías y los 46 productos iniciales. Sanity controla los productos, precios, imágenes y disponibilidad. La carta consulta cambios al abrirse, al volver a la pestaña y cada minuto; no requiere volver a publicar Angular por cada cambio.
+
+El menú del día se muestra por ahora desde los datos locales de respaldo y aparece primero al abrir la carta. El cliente añade uno o varios fondos, incluso el mismo fondo varias veces, y elige una entrada distinta para cada ración. Luego agrega todas las combinaciones al carrito y revisa el pedido completo. El precio provisional de S/ 12 o S/ 14 se toma de cada fondo. Cada combinación se agrega como un producto independiente al carrito. No se han generado imágenes para estos platos. La imagen de referencia menciona S/ 1 por envase para llevar; ese importe no está incluido en el total porque falta confirmar cuántos envases corresponden a cada pedido.
 
 ## Desarrollo y publicación
 
@@ -30,6 +32,8 @@ El panel de edición está publicado en **https://la-estacion-365-carta.sanity.s
 
 En el panel, abre **Plato o bebida**, cambia el precio o desactiva **Disponible en la carta**, y pulsa **Publish**. También puedes subir una imagen nueva; mientras un producto no tenga imagen en Sanity, la carta usa su fotografía local. Los cambios publicados se reflejan en la carta sin otro despliegue.
 
+El esquema nuevo **Menú del día** permite cambiar entradas, fondos, precios y disponibilidad sin subir imágenes. Tras publicar esta versión del Studio e importar los 20 documentos preparados, Angular leerá esa sección desde Sanity. Para importar solo los documentos que aún no existen, ejecuta `npm run seed:export` y luego `npx sanity datasets import seed/menu.ndjson --dataset production --missing` desde `studio/`. Los precios iniciales del menú del día son provisionales; confírmalos con el restaurante antes de publicar la carta.
+
 Los orígenes CORS `http://localhost:4200` y `https://carta-digital-la-estacion365.vercel.app` están autorizados para leer el dataset **sin credenciales**. Si cambias el dominio público, añade su origen en Sanity → API → CORS origins, sin habilitar credenciales para la carta pública. Nunca pongas un token de escritura en Angular.
 
 ## Editar el menú local de respaldo
@@ -37,6 +41,8 @@ Los orígenes CORS `http://localhost:4200` y `https://carta-digital-la-estacion3
 En `src/app/data/menu.data.ts`, modifica el `price` del producto en `MENU_ENTRIES`. Para retirarlo temporalmente de la carta, agrega `active: false`; quita esa propiedad o usa `active: true` para mostrarlo de nuevo. Las imágenes se encuentran en `public/images/menu/`. Los precios de bebidas son sugeridos: confirma con el restaurante el tamaño de cada presentación y el precio final antes de publicar.
 
 Este archivo sirve como respaldo si Sanity aún no tiene el menú inicial o no responde. Cuando el menú de Sanity está activo, cambiar el archivo local ya no modifica la carta pública. Los productos desactivados en Sanity no aparecen en la carta ni pueden permanecer en un carrito restaurado.
+
+Las opciones del menú del día y sus precios de respaldo están en `src/app/data/daily-menu.data.ts`. Se usan hasta que existan documentos de **Menú del día** en Sanity. Los cambios de precio y disponibilidad publicados allí se reflejarán al recargar la carta o en la siguiente actualización automática.
 
 ## Cambiar el número de WhatsApp
 

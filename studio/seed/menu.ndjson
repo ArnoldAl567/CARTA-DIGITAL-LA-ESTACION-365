@@ -50,4 +50,24 @@
 {"_id":"bebidas-infusiones","_type":"menuProduct","name":"Infusiones","category":{"_type":"reference","_ref":"bebidas"},"price":3,"fallbackImage":"/images/menu/bebidas-infusiones.webp","imageAlt":"Infusiones","featured":false,"sortOrder":43,"active":true}
 {"_id":"bebidas-cafe","_type":"menuProduct","name":"Café","category":{"_type":"reference","_ref":"bebidas"},"price":5,"fallbackImage":"/images/menu/bebidas-cafe.webp","imageAlt":"Café","featured":false,"sortOrder":44,"active":true}
 {"_id":"bebidas-jugos","_type":"menuProduct","name":"Jugos","category":{"_type":"reference","_ref":"bebidas"},"price":7,"fallbackImage":"/images/menu/bebidas-jugos.webp","imageAlt":"Jugos","featured":false,"sortOrder":45,"active":true}
+{"_id":"daily-starter-sopa-semola","_type":"dailyMenuDish","key":"sopa-semola","name":"Sopa de sémola","course":"starter","sortOrder":0,"active":true}
+{"_id":"daily-starter-huevo-rusa","_type":"dailyMenuDish","key":"huevo-rusa","name":"Huevo a la rusa","course":"starter","sortOrder":1,"active":true}
+{"_id":"daily-starter-salpicon-atun","_type":"dailyMenuDish","key":"salpicon-atun","name":"Salpicón de atún","course":"starter","sortOrder":2,"active":true}
+{"_id":"daily-starter-crema-rocoto","_type":"dailyMenuDish","key":"crema-rocoto","name":"Crema de rocoto","course":"starter","sortOrder":3,"active":true}
+{"_id":"daily-starter-ceviche","_type":"dailyMenuDish","key":"ceviche","name":"Ceviche","course":"starter","sortOrder":4,"active":true}
+{"_id":"daily-starter-ensalada-palta","_type":"dailyMenuDish","key":"ensalada-palta","name":"Ensalada de palta","course":"starter","sortOrder":5,"active":true}
+{"_id":"daily-starter-tamal-salsa-criolla","_type":"dailyMenuDish","key":"tamal-salsa-criolla","name":"Tamal con salsa criolla","course":"starter","sortOrder":6,"active":true}
+{"_id":"daily-main-arroz-mariscos","_type":"dailyMenuDish","key":"arroz-mariscos","name":"Arroz con mariscos","course":"main","price":14,"sortOrder":0,"active":true}
+{"_id":"daily-main-tallarin-verde-chuleta","_type":"dailyMenuDish","key":"tallarin-verde-chuleta","name":"Tallarín verde con chuleta","course":"main","price":14,"sortOrder":1,"active":true}
+{"_id":"daily-main-seco-res-frijol-panamito","_type":"dailyMenuDish","key":"seco-res-frijol-panamito","name":"Seco de res con frijol panamito","course":"main","price":14,"sortOrder":2,"active":true}
+{"_id":"daily-main-ensalada-rusa-asado-pollo","_type":"dailyMenuDish","key":"ensalada-rusa-asado-pollo","name":"Ensalada rusa con asado de pollo","course":"main","price":12,"sortOrder":3,"active":true}
+{"_id":"daily-main-picante-carne-huevo-frito","_type":"dailyMenuDish","key":"picante-carne-huevo-frito","name":"Picante de carne + huevo frito","course":"main","price":14,"sortOrder":4,"active":true}
+{"_id":"daily-main-lomo-saltado","_type":"dailyMenuDish","key":"lomo-saltado","name":"Lomo saltado","course":"main","price":14,"sortOrder":5,"active":true}
+{"_id":"daily-main-seco-res-papas-sancochadas","_type":"dailyMenuDish","key":"seco-res-papas-sancochadas","name":"Seco de res con papas sancochadas","course":"main","price":12,"sortOrder":6,"active":true}
+{"_id":"daily-main-pescado-frito-frijol","_type":"dailyMenuDish","key":"pescado-frito-frijol","name":"Pescado frito con frijol","course":"main","price":14,"sortOrder":7,"active":true}
+{"_id":"daily-main-chuleta-papas-fritas","_type":"dailyMenuDish","key":"chuleta-papas-fritas","name":"Chuleta con papas fritas","course":"main","price":14,"sortOrder":8,"active":true}
+{"_id":"daily-main-bistecs-papas-fritas","_type":"dailyMenuDish","key":"bistecs-papas-fritas","name":"Bistecs con papas fritas","course":"main","price":12,"sortOrder":9,"active":true}
+{"_id":"daily-main-pechuga-papas-fritas","_type":"dailyMenuDish","key":"pechuga-papas-fritas","name":"Pechuga con papas fritas","course":"main","price":12,"sortOrder":10,"active":true}
+{"_id":"daily-main-ensalada-fresca-pechuga","_type":"dailyMenuDish","key":"ensalada-fresca-pechuga","name":"Ensalada fresca con pechuga","course":"main","price":12,"sortOrder":11,"active":true}
+{"_id":"daily-main-pechuga-papas-sancochadas","_type":"dailyMenuDish","key":"pechuga-papas-sancochadas","name":"Pechuga con papas sancochadas","course":"main","price":12,"sortOrder":12,"active":true}
 {"_id":"menuSettings","_type":"menuSettings","initialized":true}
