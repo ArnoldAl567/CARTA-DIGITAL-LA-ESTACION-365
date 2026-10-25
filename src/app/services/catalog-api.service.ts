@@ -178,12 +178,23 @@ export class CatalogApiService {
     if (!response.ok) await this.parse(response);
   }
 
+  async createItem(item: CatalogItem): Promise<CatalogItem> {
+    const response = await fetch(this.dataUrl('/catalog_items?select=*'), {
+      method: 'POST',
+      headers: await this.headers(true, { 'Content-Type': 'application/json', Prefer: 'return=representation' }),
+      body: JSON.stringify(item),
+    });
+    const rows = await this.parse<CatalogItem[]>(response);
+    if (!rows.length) throw new Error('No se pudo crear el plato en la base de datos.');
+    return rows[0];
+  }
+
   async updateItem(item: CatalogItem): Promise<CatalogItem> {
     const query = new URLSearchParams({ item_key: `eq.${item.item_key}`, select: '*' });
     const response = await fetch(this.dataUrl(`/catalog_items?${query}`), {
       method: 'PATCH',
       headers: await this.headers(true, { 'Content-Type': 'application/json', Prefer: 'return=representation' }),
-      body: JSON.stringify({ name: item.name, price: item.price, image_url: item.image_url, active: item.active }),
+      body: JSON.stringify({ category_id: item.category_id, name: item.name, price: item.price, image_url: item.image_url, active: item.active }),
     });
     const rows = await this.parse<CatalogItem[]>(response);
     if (!rows.length) throw new Error('El plato no se encontró en la base de datos.');

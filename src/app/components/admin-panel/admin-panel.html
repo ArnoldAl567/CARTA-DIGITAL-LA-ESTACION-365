@@ -31,11 +31,11 @@
           </form>
         } @else {
           <h1 id="login-title">Administra tu carta</h1>
-          <p>Inicia sesión para actualizar platos, precios, fotos y disponibilidad.</p>
+          <p>Ingresa con tu usuario y contraseña para actualizar la carta.</p>
           @if (notice()) { <p class="login-notice" role="status">{{ notice() }}</p> }
           <form (ngSubmit)="signIn()">
-            <label for="admin-email">Correo electrónico</label>
-            <input id="admin-email" name="email" type="email" autocomplete="username" required [(ngModel)]="email" placeholder="tu@restaurante.com">
+            <label for="admin-username">Usuario</label>
+            <input id="admin-username" name="username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="40" required [(ngModel)]="username" placeholder="Ingresa tu usuario">
             <label for="admin-password">Contraseña</label>
             <input id="admin-password" name="password" type="password" autocomplete="current-password" required [(ngModel)]="password" placeholder="••••••••">
             @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
@@ -75,6 +75,7 @@
                 <button type="button" [class.active]="filter() === 'fondo'" [attr.aria-pressed]="filter() === 'fondo'" (click)="selectFilter('fondo')">Fondos del día</button>
                 <button type="button" [class.active]="filter() === 'entrada'" [attr.aria-pressed]="filter() === 'entrada'" (click)="selectFilter('entrada')">Entradas</button>
               </nav>
+              <button class="create-button" type="button" [disabled]="!authenticated() || busy()" (click)="create()"><span aria-hidden="true">+</span> {{ filter() === 'entrada' ? 'Agregar entrada' : 'Agregar plato' }}</button>
               <label class="search-box"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.5"/><path d="m16 16 5 5"/></svg><span class="visually-hidden">Buscar platos</span><input type="search" placeholder="Buscar un plato…" [ngModel]="search()" (ngModelChange)="search.set($event)"></label>
             </div>
             <div class="item-list">
@@ -93,22 +94,26 @@
           <aside class="editor-column">
             @if (editForm; as dish) {
               <section class="editor-card" aria-labelledby="editor-title">
-                <div class="editor-heading"><div><span class="eyebrow">EDITAR PRODUCTO</span><h2 id="editor-title">{{ dish.name }}</h2></div><button type="button" class="close-button" (click)="closeEditor()" aria-label="Cerrar edición">×</button></div>
+                <div class="editor-heading"><div><span class="eyebrow">{{ editorMode === 'create' ? 'NUEVO PRODUCTO' : 'EDITAR PRODUCTO' }}</span><h2 id="editor-title">{{ editorMode === 'create' ? (dish.kind === 'entrada' ? 'Agregar entrada' : 'Agregar plato') : dish.name }}</h2></div><button type="button" class="close-button" (click)="closeEditor()" aria-label="Cerrar edición">×</button></div>
                 <div class="editor-photo">@if (editImagePreview) { <img [src]="editImagePreview" [alt]="dish.name"> } @else { <span>Sin fotografía</span> }</div>
                 <form (ngSubmit)="saveItem()">
                   <label for="dish-photo">Fotografía</label>
-                  <input id="dish-photo" name="dish-photo" type="file" accept="image/jpeg,image/png,image/webp" (change)="chooseImage($event)">
+                  <input id="dish-photo" name="dish-photo" type="file" accept="image/jpeg,image/png,image/webp" [required]="editorMode === 'create'" (change)="chooseImage($event)">
                   <small class="field-note">JPG, PNG o WebP · máximo 5 MB</small>
                   <label for="dish-name">Nombre del plato</label>
                   <input id="dish-name" name="dish-name" type="text" maxlength="120" required [(ngModel)]="dish.name">
                   @if (dish.kind === 'carta') {
+                    <label for="dish-category">Categoría</label>
+                    <select id="dish-category" name="dish-category" required [(ngModel)]="dish.category_id">
+                      @for (category of categories; track category.id) { <option [value]="category.id">{{ category.name }}</option> }
+                    </select>
                     <label for="dish-price">Precio (S/)</label>
-                    <input id="dish-price" name="dish-price" type="number" min="0" max="9999.99" step="0.01" [(ngModel)]="dish.price" placeholder="Precio por consultar">
+                    <input id="dish-price" name="dish-price" type="number" min="0" max="9999.99" step="0.01" [required]="editorMode === 'create'" [(ngModel)]="dish.price" placeholder="Precio por consultar">
                   } @else {
                     <p class="field-note daily-price-note">El precio del menú Económico y Ejecutivo se cambia en la tarjeta inferior.</p>
                   }
                   <label class="availability-switch"><input type="checkbox" name="dish-active" [(ngModel)]="dish.active"><span>Disponible en la carta</span></label>
-                  <button class="primary-button" type="submit" [disabled]="!authenticated() || busy()">{{ busy() ? 'Guardando…' : 'Guardar cambios' }} <span aria-hidden="true">→</span></button>
+                  <button class="primary-button" type="submit" [disabled]="!authenticated() || busy()">{{ busy() ? 'Guardando…' : editorMode === 'create' ? 'Agregar a la carta' : 'Guardar cambios' }} <span aria-hidden="true">→</span></button>
                   @if (!configured) { <p class="field-note">Conecta Neon para habilitar el guardado.</p> }
                 </form>
               </section>

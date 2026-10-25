@@ -75,7 +75,6 @@ button, a, input, textarea { -webkit-tap-highlight-color: transparent; }
 .menu-shell .category-list .category-section:nth-child(odd) .category-title h3, .menu-shell .category-list .category-section:nth-child(odd) .category-index { color: #246f96; }
 .menu-shell .category-list .category-section:nth-child(even) .category-title h3 { color: var(--leaf-dark); }
 .menu-shell .daily-course { min-width: 0; padding: 18px; border: 1px solid #cfe8d2; border-radius: 22px; background: linear-gradient(145deg, #eaf7dc 0%, #f8fdf5 58%, #e8f6fc 100%); }
-.menu-shell .daily-course .category-title h3 { color: var(--leaf-dark); }
 .daily-desktop-builder { background: linear-gradient(155deg, #fff 0%, #f8fdf6 70%, #eaf7dc 100%); }
 @media (max-width: 760px) { .menu-shell .category-list .category-section { padding: 13px 9px; border-radius: 16px; }.menu-shell .category-list .category-section::before { right: 12px; width: 80px; background-size: 80px 8px; }.menu-shell .daily-course { padding: 13px 9px; border-radius: 16px; } }
 @media (max-width: 1200px) and (min-width: 761px) { .daily-layout.has-selection .daily-options { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

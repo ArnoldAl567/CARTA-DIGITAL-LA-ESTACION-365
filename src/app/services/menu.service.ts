@@ -2,8 +2,9 @@ import { inject, Injectable, signal } from '@angular/core';
 import { CATEGORIES, PRODUCTS } from '../data/menu.data';
 import { DAILY_MAINS, DAILY_STARTERS } from '../data/daily-menu.data';
 import { catalogConfigured } from '../config/neon.config';
-import { CatalogItem, DailyPrices, DEFAULT_DAILY_PRICES } from '../models/catalog.models';
+import { DailyPrices, DEFAULT_DAILY_PRICES } from '../models/catalog.models';
 import { CatalogApiService } from './catalog-api.service';
+import { mapCatalogRows } from './catalog-menu.mapper';
 
 @Injectable({ providedIn: 'root' })
 export class MenuService {
@@ -35,7 +36,10 @@ export class MenuService {
         this.ready.set(false);
         return;
       }
-      this.applyRows(rows);
+      const catalog = mapCatalogRows(rows);
+      this.products.set(catalog.products);
+      this.dailyMains.set(catalog.dailyMains);
+      this.dailyStarters.set(catalog.dailyStarters);
       this.syncError.set('');
       this.ready.set(true);
     } catch {
@@ -46,20 +50,4 @@ export class MenuService {
     }
   }
 
-  private applyRows(rows: CatalogItem[]): void {
-    const byKey = new Map(rows.map(row => [row.item_key, row]));
-    this.products.set(PRODUCTS.map(product => {
-      const row = byKey.get(`carta:${product.id}`);
-      return row ? { ...product, name: row.name, price: row.price, image: row.image_url,
-        imageAlt: row.name, active: row.active } : product;
-    }));
-    this.dailyMains.set(DAILY_MAINS.map(dish => {
-      const row = byKey.get(`fondo:${dish.id}`);
-      return row ? { ...dish, name: row.name, image: row.image_url ?? undefined, active: row.active } : dish;
-    }).filter(dish => dish.active !== false));
-    this.dailyStarters.set(DAILY_STARTERS.map(dish => {
-      const row = byKey.get(`entrada:${dish.id}`);
-      return row ? { ...dish, name: row.name, image: row.image_url ?? undefined, active: row.active } : dish;
-    }).filter(dish => dish.active !== false));
-  }
 }

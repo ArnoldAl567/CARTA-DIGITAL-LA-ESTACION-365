@@ -1,5 +1,6 @@
 import { Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ADMIN_LOGIN } from '../../config/admin-login.config';
 import { CATEGORIES } from '../../data/menu.data';
 import { INITIAL_CATALOG } from '../../data/catalog-seed';
 import { CatalogItem, CatalogKind, DailyPrices, DEFAULT_DAILY_PRICES } from '../../models/catalog.models';
@@ -39,14 +40,16 @@ export class AdminPanel implements OnInit, OnDestroy {
   readonly activeCount = computed(() => this.rows().filter(row => row.active).length);
   readonly inactiveCount = computed(() => this.rows().length - this.activeCount());
   readonly categoryNames = new Map(CATEGORIES.map(category => [category.id, category.shortName]));
+  readonly categories = CATEGORIES;
   readonly prices = signal<DailyPrices>(DEFAULT_DAILY_PRICES);
   priceForm: DailyPrices = { ...DEFAULT_DAILY_PRICES };
-  email = '';
+  username = '';
   password = '';
   resetPassword = '';
   resetPasswordConfirmation = '';
   readonly resetToken = new URLSearchParams(window.location.search).get('token') ?? '';
   editForm: CatalogItem | null = null;
+  editorMode: 'create' | 'edit' | null = null;
   editImagePreview = '';
   private selectedFile: File | null = null;
   private objectUrl: string | null = null;
@@ -64,9 +67,14 @@ export class AdminPanel implements OnInit, OnDestroy {
   async signIn(): Promise<void> {
     if (this.busy()) return;
     this.error.set('');
+    if (this.username.trim().toLocaleLowerCase('es-PE') !== ADMIN_LOGIN.username.toLocaleLowerCase('es-PE')) {
+      this.error.set('Usuario o contraseña incorrectos.');
+      this.password = '';
+      return;
+    }
     this.busy.set(true);
     try {
-      await this.api.signIn(this.email.trim(), this.password);
+      await this.api.signIn(ADMIN_LOGIN.email, this.password);
       this.password = '';
       this.notice.set('');
       this.authenticated.set(true);
@@ -85,13 +93,12 @@ export class AdminPanel implements OnInit, OnDestroy {
 
   async requestPasswordReset(): Promise<void> {
     if (this.busy()) return;
-    if (!this.email.trim()) { this.error.set('Escribe tu correo para recibir el enlace.'); return; }
     this.error.set('');
     this.notice.set('');
     this.busy.set(true);
     try {
-      await this.api.requestPasswordReset(this.email.trim());
-      this.notice.set('Si el correo tiene una cuenta, recibirás un enlace para crear o cambiar la contraseña.');
+      await this.api.requestPasswordReset(ADMIN_LOGIN.email);
+      this.notice.set('Enviamos un enlace al correo administrador para crear o cambiar la contraseña.');
     } catch (error) { this.error.set(this.message(error)); }
     finally { this.busy.set(false); }
   }
@@ -138,10 +145,42 @@ export class AdminPanel implements OnInit, OnDestroy {
     if (!this.authenticated() && this.configured) return;
     this.releasePreview();
     this.editForm = { ...row };
+    this.editorMode = 'edit';
     this.editImagePreview = row.image_url ?? '';
     this.selectedFile = null;
     this.error.set('');
     this.notice.set('');
+    this.revealEditor();
+  }
+
+  create(): void {
+    if (!this.authenticated() || this.busy()) return;
+    const selectedFilter = this.filter();
+    const kind: CatalogKind = selectedFilter === 'todos' ? 'carta' : selectedFilter;
+    const sourceId = `nuevo-${crypto.randomUUID()}`;
+    const lastOrder = Math.max(-1, ...this.rows().filter(row => row.kind === kind).map(row => row.sort_order));
+    this.releasePreview();
+    this.editForm = {
+      item_key: `${kind}:${sourceId}`,
+      kind,
+      source_id: sourceId,
+      category_id: kind === 'carta' ? this.categories[0].id : null,
+      name: '',
+      price: null,
+      image_url: null,
+      active: true,
+      sort_order: lastOrder + 1,
+    };
+    this.editorMode = 'create';
+    this.search.set('');
+    this.selectedFile = null;
+    this.editImagePreview = '';
+    this.error.set('');
+    this.notice.set('');
+    this.revealEditor();
+  }
+
+  private revealEditor(): void {
     if (window.matchMedia('(max-width: 850px)').matches) {
       requestAnimationFrame(() => document.querySelector('.editor-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
     }
@@ -150,6 +189,7 @@ export class AdminPanel implements OnInit, OnDestroy {
   closeEditor(): void {
     this.releasePreview();
     this.editForm = null;
+    this.editorMode = null;
     this.selectedFile = null;
     this.editImagePreview = '';
   }
@@ -179,6 +219,15 @@ export class AdminPanel implements OnInit, OnDestroy {
     if (!this.editForm || !this.authenticated() || this.busy()) return;
     const item = { ...this.editForm, name: this.editForm.name.trim() };
     if (!item.name) { this.error.set('Escribe el nombre del plato.'); return; }
+    if (this.editorMode === 'create' && !this.selectedFile) {
+      this.error.set('Sube una fotografía para el nuevo plato.'); return;
+    }
+    if (item.kind === 'carta' && !this.categories.some(category => category.id === item.category_id)) {
+      this.error.set('Elige una categoría para el plato.'); return;
+    }
+    if (this.editorMode === 'create' && item.kind === 'carta' && item.price === null) {
+      this.error.set('Escribe el precio del plato.'); return;
+    }
     if (item.kind === 'carta' && item.price !== null && (!Number.isFinite(Number(item.price)) || Number(item.price) < 0 || Number(item.price) > 9999.99)) {
       this.error.set('El precio debe estar entre S/ 0 y S/ 9 999.99.'); return;
     }
@@ -190,11 +239,14 @@ export class AdminPanel implements OnInit, OnDestroy {
     try {
       if (this.selectedFile) item.image_url = await this.api.uploadImage(this.selectedFile);
       if (item.kind === 'carta' && item.price !== null) item.price = Number(item.price);
-      const saved = await this.api.updateItem(item);
-      this.rows.update(rows => rows.map(row => row.item_key === saved.item_key ? saved : row));
+      const creating = this.editorMode === 'create';
+      const saved = creating ? await this.api.createItem(item) : await this.api.updateItem(item);
+      this.rows.update(rows => creating
+        ? [...rows, saved].sort((a, b) => a.sort_order - b.sort_order)
+        : rows.map(row => row.item_key === saved.item_key ? saved : row));
       await this.menu.refresh();
       this.closeEditor();
-      this.notice.set('Cambios guardados y visibles en la carta digital.');
+      this.notice.set(creating ? 'Plato agregado y visible en la carta digital.' : 'Cambios guardados y visibles en la carta digital.');
     } catch (error) { this.error.set(this.message(error)); }
     finally { this.busy.set(false); }
   }
