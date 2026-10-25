@@ -2,8 +2,9 @@
   max-width: 919px;
   margin: 18px auto 0;
   overflow: hidden;
-  border-radius: 20px;
-  box-shadow: 0 20px 50px rgba(49, 106, 54, .12);
+  border: 5px solid #fff;
+  border-radius: 23px;
+  box-shadow: 0 22px 54px rgba(39, 104, 55, .12), 0 0 0 1px rgba(73, 168, 209, .22);
   animation: hero-enter .65s var(--ease) both;
 }
 
@@ -26,6 +27,7 @@
 @media (max-width: 740px) {
   .hero {
     margin: 10px 10px 0;
-    border-radius: 15px;
+    border-width: 3px;
+    border-radius: 17px;
   }
 }

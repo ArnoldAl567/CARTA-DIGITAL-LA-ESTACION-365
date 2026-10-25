@@ -4,6 +4,7 @@ export const BUSINESS_CONFIG = {
   name: 'LA ESTACIÓN 365',
   whatsapp: '51902586908', // Contacto temporal de IntegraTech.
   displayWhatsapp: '+51 902 586 908',
+  packagingFeePerDish: 1,
   currency: 'PEN',
   locale: 'es-PE',
   tagline: 'Restaurante & cevichería',

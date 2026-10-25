@@ -1,13 +1,20 @@
 import { Product } from '../models/menu.models';
 
+export const DAILY_MENU_TYPES = {
+  economico: { label: 'Económico', price: 12 },
+  ejecutivo: { label: 'Ejecutivo', price: 14 },
+} as const;
+export type DailyMenuType = keyof typeof DAILY_MENU_TYPES;
+
 export interface DailyDish {
   id: string;
   name: string;
-  price?: number;
   image?: string;
   active?: boolean;
   sortOrder?: number;
 }
+
+const dailyMain = (id: string, name: string): DailyDish => ({ id, name, image: `/images/daily/${id}.webp` });
 
 // Platos transcritos de la carta de menú del día proporcionada por el restaurante.
 export const DAILY_STARTERS: DailyDish[] = [
@@ -21,37 +28,41 @@ export const DAILY_STARTERS: DailyDish[] = [
 ];
 
 export const DAILY_MAINS: DailyDish[] = [
-  { id: 'arroz-mariscos', name: 'Arroz con mariscos', price: 14, image: '/images/daily/arroz-mariscos.webp' },
-  { id: 'tallarin-verde-chuleta', name: 'Tallarín verde con chuleta', price: 14, image: '/images/daily/tallarin-verde-chuleta.webp' },
-  { id: 'seco-res-frijol-panamito', name: 'Seco de res con frijol panamito', price: 14, image: '/images/daily/seco-res-frijol-panamito.webp' },
-  { id: 'ensalada-rusa-asado-pollo', name: 'Ensalada rusa con asado de pollo', price: 12, image: '/images/daily/ensalada-rusa-asado-pollo.webp' },
-  { id: 'picante-carne-huevo-frito', name: 'Picante de carne + huevo frito', price: 14, image: '/images/daily/picante-carne-huevo-frito.webp' },
-  { id: 'lomo-saltado', name: 'Lomo saltado', price: 14, image: '/images/daily/lomo-saltado.webp' },
-  { id: 'seco-res-papas-sancochadas', name: 'Seco de res con papas sancochadas', price: 12, image: '/images/daily/seco-res-papas-sancochadas.webp' },
-  { id: 'pescado-frito-frijol', name: 'Pescado frito con frijol', price: 14, image: '/images/daily/pescado-frito-frijol.webp' },
-  { id: 'chuleta-papas-fritas', name: 'Chuleta con papas fritas', price: 14, image: '/images/daily/chuleta-papas-fritas.webp' },
-  { id: 'bistecs-papas-fritas', name: 'Bistecs con papas fritas', price: 12, image: '/images/daily/bistecs-papas-fritas.webp' },
-  { id: 'pechuga-papas-fritas', name: 'Pechuga con papas fritas', price: 12, image: '/images/daily/pechuga-papas-fritas.webp' },
-  { id: 'ensalada-fresca-pechuga', name: 'Ensalada fresca con pechuga', price: 12, image: '/images/daily/ensalada-fresca-pechuga.webp' },
-  { id: 'pechuga-papas-sancochadas', name: 'Pechuga con papas sancochadas', price: 12, image: '/images/daily/pechuga-papas-sancochadas.webp' },
+  dailyMain('arroz-mariscos', 'Arroz con mariscos'),
+  dailyMain('tallarin-verde-chuleta', 'Tallarín verde con chuleta'),
+  dailyMain('seco-res-frijol-panamito', 'Seco de res con frijol panamito'),
+  dailyMain('ensalada-rusa-asado-pollo', 'Ensalada rusa con asado de pollo'),
+  dailyMain('picante-carne-huevo-frito', 'Picante de carne + huevo frito'),
+  dailyMain('lomo-saltado', 'Lomo saltado'),
+  dailyMain('seco-res-papas-sancochadas', 'Seco de res con papas sancochadas'),
+  dailyMain('pescado-frito-frijol', 'Pescado frito con frijol'),
+  dailyMain('chuleta-papas-fritas', 'Chuleta con papas fritas'),
+  dailyMain('bistecs-papas-fritas', 'Bistecs con papas fritas'),
+  dailyMain('pechuga-papas-fritas', 'Pechuga con papas fritas'),
+  dailyMain('ensalada-fresca-pechuga', 'Ensalada fresca con pechuga'),
+  dailyMain('pechuga-papas-sancochadas', 'Pechuga con papas sancochadas'),
 ];
 
-// Precios de prueba: el restaurante debe confirmar qué fondos cuestan S/ 12 o S/ 14.
-export function dailyMenuProduct(mainId: string, starterId: string, starters = DAILY_STARTERS, mains = DAILY_MAINS): Product | null {
+// Los ID anteriores no incluían tipo; conservar su precio al recuperar carritos guardados.
+const LEGACY_EXECUTIVE_MAINS = new Set(['arroz-mariscos', 'tallarin-verde-chuleta', 'seco-res-frijol-panamito', 'picante-carne-huevo-frito', 'lomo-saltado', 'pescado-frito-frijol', 'chuleta-papas-fritas']);
+
+export function dailyMenuProduct(mainId: string, starterId: string, type: DailyMenuType, starters = DAILY_STARTERS, mains = DAILY_MAINS): Product | null {
   const main = mains.find(dish => dish.id === mainId && dish.active !== false);
   const starter = starters.find(dish => dish.id === starterId && dish.active !== false);
-  if (!main || !starter || main.price === undefined) return null;
+  if (!main || !starter) return null;
   return {
-    id: `menu-dia__${main.id}__${starter.id}`,
+    id: `menu-dia__${main.id}__${starter.id}__${type}`,
     categoryId: 'menu-dia',
-    name: `Menú: ${main.name} + ${starter.name}`,
-    price: main.price,
+    name: `Menú ${DAILY_MENU_TYPES[type].label}: ${main.name} + ${starter.name}`,
+    price: DAILY_MENU_TYPES[type].price,
     image: main.image,
     imageAlt: main.name,
   };
 }
 
 export function dailyMenuProductById(id: string, starters = DAILY_STARTERS, mains = DAILY_MAINS): Product | null {
-  const match = /^menu-dia__([^_]+)__([^_]+)$/.exec(id);
-  return match ? dailyMenuProduct(match[1], match[2], starters, mains) : null;
+  const match = /^menu-dia__([^_]+)__([^_]+)(?:__(economico|ejecutivo))?$/.exec(id);
+  if (!match) return null;
+  const type = match[3] as DailyMenuType | undefined ?? (LEGACY_EXECUTIVE_MAINS.has(match[1]) ? 'ejecutivo' : 'economico');
+  return dailyMenuProduct(match[1], match[2], type, starters, mains);
 }

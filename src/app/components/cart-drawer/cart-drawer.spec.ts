@@ -1,14 +1,16 @@
 import { TestBed } from '@angular/core/testing';
 import { CartService } from '../../services/cart.service';
+import { CartItem, Product } from '../../models/menu.models';
 import { CartDrawer } from './cart-drawer';
 
 describe('CartDrawer WhatsApp order', () => {
-  const product = { id: 'marinos-jalea-mixta', categoryId: 'marinos', name: 'Jalea mixta', price: 28 };
+  const product: Product = { id: 'marinos-jalea-mixta', categoryId: 'marinos', name: 'Jalea mixta', price: 28 };
+  const drink: Product = { id: 'bebidas-chicha', categoryId: 'bebidas', name: 'Chicha', price: 5 };
 
-  function createDrawer(): CartDrawer {
+  function createDrawer(items: CartItem[] = [{ product, quantity: 2, notes: 'Sin picante' }]): CartDrawer {
     const cart = {
-      items: () => [{ product, quantity: 2, notes: 'Sin picante' }],
-      total: () => 56,
+      items: () => items,
+      total: () => items.reduce((sum, item) => sum + (item.product.price ?? 0) * item.quantity, 0),
     } as unknown as CartService;
     const drawer = TestBed.runInInjectionContext(() => new CartDrawer(cart));
     drawer.customer = { name: 'Ana Pérez', phone: '987654321', method: 'pickup', payment: 'yape', address: '', reference: '' };
@@ -30,9 +32,10 @@ describe('CartDrawer WhatsApp order', () => {
     const message = sentMessage(open);
     expect(message).toContain('🛒 *NUEVO PEDIDO*');
     expect(message).toContain('🍽️ *Jalea mixta*\n📦 Cantidad: 2\n💰 S/ 56.00\n📝 Sin picante');
-    expect(message).toContain('💵 *TOTAL: S/ 56.00*');
+    expect(message).toContain('📦 Tápers (2 × S/ 1.00): S/ 2.00');
+    expect(message).toContain('💵 *TOTAL: S/ 58.00*');
     expect(message).toContain('📋 *DATOS DEL CLIENTE*');
-    expect(message).toContain('👤 Nombre: Ana Pérez\n📱 Celular: 987654321\n💳 Pago: Yape\n📍 Recojo en local');
+    expect(message).toContain('👤 Nombre: Ana Pérez\n📱 Celular: 987654321\n💳 Pago: Yape\n📍 Retiro en local');
     expect(message).not.toContain('DNI');
   });
 
@@ -45,8 +48,41 @@ describe('CartDrawer WhatsApp order', () => {
     drawer.customer.reference = 'Frente al parque';
     drawer.sendOrder();
     const message = sentMessage(open);
+    expect(message).toContain('📦 Tápers (2 × S/ 1.00): S/ 2.00');
+    expect(message).toContain('💵 *TOTAL: S/ 58.00*');
     expect(message).toContain('💳 Pago: Efectivo');
     expect(message).toContain('📍 Dirección: Av. Principal 123\n   Ref.: Frente al parque');
+  });
+
+  it('charges per dish for pickup and delivery but excludes drinks', () => {
+    const open = spyOn(window, 'open');
+    const drawer = createDrawer([
+      { product, quantity: 2, notes: '' },
+      { product: drink, quantity: 3, notes: '' },
+    ]);
+    expect(drawer.packagingItemCount()).toBe(2);
+    expect(drawer.orderTotal()).toBe(73);
+    drawer.customer.method = 'delivery';
+    drawer.customer.address = 'Av. Principal 123';
+    expect(drawer.packagingItemCount()).toBe(2);
+    expect(drawer.packagingTotal()).toBe(2);
+    expect(drawer.orderTotal()).toBe(73);
+    drawer.sendOrder();
+    const message = sentMessage(open);
+    expect(message).toContain('📦 Tápers (2 × S/ 1.00): S/ 2.00');
+    expect(message).toContain('💵 *TOTAL: S/ 73.00*');
+  });
+
+  it('sends table orders without asking for a table number or charging packaging', () => {
+    const open = spyOn(window, 'open');
+    const drawer = createDrawer();
+    drawer.customer.method = 'table';
+    expect(drawer.orderTotal()).toBe(56);
+    drawer.sendOrder();
+    const message = sentMessage(open);
+    expect(message).toContain('🪑 Pedido para mesa');
+    expect(message).toContain('💵 *TOTAL: S/ 56.00*');
+    expect(message).not.toContain('Tápers (');
   });
 
   it('requires payment and a nine digit phone before opening WhatsApp', () => {

@@ -49,9 +49,10 @@
           <div class="section-title"><span>02</span><h3 id="customer-title">Entrega y contacto</h3></div>
           <fieldset>
             <legend>¿Cómo recibirás tu pedido?</legend>
-            <div class="method-options">
-              <label [class.selected]="customer.method === 'pickup'"><input type="radio" name="method" value="pickup" [(ngModel)]="customer.method" (ngModelChange)="clearError()"><span><strong>Recojo en local</strong><small>Coordina la hora por WhatsApp</small></span></label>
-              <label [class.selected]="customer.method === 'delivery'"><input type="radio" name="method" value="delivery" [(ngModel)]="customer.method" (ngModelChange)="clearError()"><span><strong>Entrega a domicilio</strong><small>Delivery gratis · consulta cobertura</small></span></label>
+            <div class="method-options delivery-method-options">
+              <label [class.selected]="customer.method === 'pickup'"><input type="radio" name="method" value="pickup" [(ngModel)]="customer.method" (ngModelChange)="clearError()"><span><strong>Retiro en local</strong><small>Táper: +S/ {{ config.packagingFeePerDish }} por plato</small></span></label>
+              <label [class.selected]="customer.method === 'delivery'"><input type="radio" name="method" value="delivery" [(ngModel)]="customer.method" (ngModelChange)="clearError()"><span><strong>Entrega a domicilio</strong><small>Táper: +S/ {{ config.packagingFeePerDish }} por plato</small></span></label>
+              <label [class.selected]="customer.method === 'table'"><input type="radio" name="method" value="table" [(ngModel)]="customer.method" (ngModelChange)="clearError()"><span><strong>Pedido para mesa</strong><small>Para consumir en el local</small></span></label>
             </div>
           </fieldset>
           <div class="field-grid">
@@ -77,7 +78,13 @@
 
     @if (cart.items().length) {
       <footer class="drawer-footer">
-        <div class="total-row"><span>Total de productos</span><strong>{{ cart.total() | currency:'PEN':'symbol-narrow':'1.2-2':'es-PE' }}</strong></div>
+        @if (customer.method !== 'table') {
+          <div class="charge-row"><span>Productos</span><strong>{{ cart.total() | currency:'PEN':'symbol-narrow':'1.2-2':'es-PE' }}</strong></div>
+          @if (packagingItemCount()) {
+            <div class="charge-row"><span>{{ packagingItemCount() === 1 ? 'Táper' : 'Tápers' }} ({{ packagingItemCount() }} × S/ {{ config.packagingFeePerDish }})</span><strong>{{ packagingTotal() | currency:'PEN':'symbol-narrow':'1.2-2':'es-PE' }}</strong></div>
+          }
+        }
+        <div class="total-row"><span>Total del pedido</span><strong>{{ orderTotal() | currency:'PEN':'symbol-narrow':'1.2-2':'es-PE' }}</strong></div>
         @if (errorMessage()) { <p class="form-error" role="alert">{{ errorMessage() }}</p> }
         <button class="whatsapp" type="button" (click)="sendOrder()">Enviar pedido por WhatsApp <span aria-hidden="true">↗</span></button>
         <p class="send-note">Revisa el mensaje y pulsa enviar en WhatsApp.</p>

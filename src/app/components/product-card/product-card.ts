@@ -9,6 +9,7 @@ export class ProductCard {
   readonly quantity = input(0);
   readonly statusLabel = input('En tu pedido');
   readonly addContext = input('al pedido');
+  readonly priceLabel = input<string | null>(null);
   readonly addDisabled = input(false);
   readonly added = output<Product>();
   readonly decreased = output<Product>();

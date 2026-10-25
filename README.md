@@ -16,12 +16,16 @@ El sitio compilado puede publicarse en un alojamiento para archivos estáticos. 
 ## Editar platos y disponibilidad
 
 - **Platos a la carta y bebidas:** modifica `src/app/data/menu.data.ts`. Cada producto tiene nombre, precio, imagen y categoría. Para ocultar un producto, establece `active: false`; para mostrarlo, usa `active: true` o elimina esa propiedad. Sus imágenes están en `public/images/menu/`.
-- **Menú del día:** modifica `src/app/data/daily-menu.data.ts`. Las entradas están en `DAILY_STARTERS` y los fondos en `DAILY_MAINS`. Cada fondo tiene su precio; se puede ocultar con `active: false`. Sus imágenes están en `public/images/daily/`.
+- **Menú del día:** modifica `src/app/data/daily-menu.data.ts`. Las entradas están en `DAILY_STARTERS` y los fondos en `DAILY_MAINS`. Cada fondo puede pedirse como menú Económico (S/ 12) o Ejecutivo (S/ 14); el tipo se elige para cada ración. Se puede ocultar con `active: false`. Sus imágenes están en `public/images/daily/`.
 - Las fotografías del menú del día son ilustrativas. Sustitúyelas por fotografías reales del restaurante cuando estén disponibles.
 
-Los precios S/ 12 y S/ 14 del menú del día y los precios de bebidas son provisionales: confírmalos con el restaurante antes de publicar. La referencia del menú menciona S/ 1 por envase para llevar; no está incluido en el total porque falta definir cuántos envases corresponden a cada pedido.
+El menú Económico cuesta S/ 12 y el Ejecutivo S/ 14, con cualquiera de los fondos disponibles. Los precios de bebidas son provisionales.
 
-El menú del día aparece primero al abrir la carta. Un buscador filtra los fondos por nombre, incluso si se escribe sin tildes. Los fondos tienen tarjetas con **Agregar** y controles **− cantidad +**. Cada ración permite elegir una entrada diferente. Al bajar la cantidad, se retira la última ración añadida de ese fondo. Después se agregan las combinaciones al carrito.
+Al elegir **retiro en local** o **entrega a domicilio**, el pedido suma **S/ 1 por táper por cada plato** (incluidos los menús del día). Las bebidas y los pedidos para mesa no generan este cargo. El carrito muestra el desglose y envía el mismo total por WhatsApp. Para modificar el importe, cambia `packagingFeePerDish` en `BUSINESS_CONFIG`, dentro de `src/app/data/menu.data.ts`.
+
+El pedido ofrece **retiro en local**, **entrega a domicilio** y **pedido para mesa**. La opción de mesa se indica en el mensaje de WhatsApp sin solicitar un número de mesa y sin cargo por táper.
+
+El menú del día aparece primero al abrir la carta. Puedes buscar los fondos por nombre incluso si se escribe sin tildes. Los fondos tienen tarjetas con **Agregar** y controles **− cantidad +**. En celular, el tipo (Económico o Ejecutivo) y la entrada aparecen debajo del plato seleccionado, y cada plato se añade al carrito desde allí. En escritorio, todas las raciones se editan juntas en un único panel lateral y se añaden al pedido con un solo botón. Cada ración puede tener una entrada diferente. Al bajar la cantidad, se retira la última ración añadida de ese fondo.
 
 ## Cambiar el número de WhatsApp
 

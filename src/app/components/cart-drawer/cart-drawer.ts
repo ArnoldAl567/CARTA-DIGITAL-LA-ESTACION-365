@@ -68,6 +68,13 @@ export class CartDrawer implements OnChanges, OnDestroy {
   paymentInvalid(): boolean { return this.submitted() && !this.customer.payment; }
   clearError(): void { this.errorMessage.set(''); }
 
+  packagingItemCount(): number {
+    if (this.customer.method === 'table') return 0;
+    return this.cart.items().reduce((count, item) => count + (item.product.categoryId === 'bebidas' ? 0 : item.quantity), 0);
+  }
+  packagingTotal(): number { return this.packagingItemCount() * this.config.packagingFeePerDish; }
+  orderTotal(): number { return this.cart.total() + this.packagingTotal(); }
+
   sendOrder(): void {
     this.submitted.set(true);
     this.errorMessage.set('');
@@ -88,13 +95,16 @@ export class CartDrawer implements OnChanges, OnDestroy {
     }).join('\n\n');
     const location = this.customer.method === 'delivery'
       ? `📍 Dirección: ${clean(this.customer.address)}${clean(this.customer.reference) ? `\n   Ref.: ${clean(this.customer.reference)}` : ''}`
-      : '📍 Recojo en local';
+      : this.customer.method === 'table'
+        ? '🪑 Pedido para mesa'
+        : '📍 Retiro en local';
     const message = [
       '🛒 *NUEVO PEDIDO*',
       '',
       products,
       '────────────────────',
-      `💵 *TOTAL: S/ ${this.cart.total().toFixed(2)}*`,
+      ...(this.packagingItemCount() ? [`📦 Tápers (${this.packagingItemCount()} × S/ ${this.config.packagingFeePerDish.toFixed(2)}): S/ ${this.packagingTotal().toFixed(2)}`] : []),
+      `💵 *TOTAL: S/ ${this.orderTotal().toFixed(2)}*`,
       '',
       '📋 *DATOS DEL CLIENTE*',
       `👤 Nombre: ${clean(this.customer.name)}`,
