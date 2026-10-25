@@ -1,6 +1,24 @@
-@import '@fontsource-variable/fraunces/wght.css';
-@import '@fontsource-variable/fraunces/wght-italic.css';
-@import '@fontsource-variable/dm-sans/wght.css';
+@font-face {
+  font-family: 'Move Sans';
+  src: url('/fonts/movesans-medium.otf') format('opentype');
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Move Sans';
+  src: url('/fonts/movesans-bold.otf') format('opentype');
+  font-style: normal;
+  font-weight: 700 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/fonts/Montserrat-VariableFont_wght.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
 
 :root {
   --navy: #24698f;
@@ -11,14 +29,16 @@
   --leaf: #367d38;
   --leaf-dark: #285f31;
   --leaf-pale: #eaf7dc;
+  --lime: #aeff00;
+  --lime-soft: #eaffbd;
   --paper: #eef8e8;
   --ink: #253f37;
   --muted: #536d68;
   --line: #cfe3d1;
   --sky: #49a8d1;
   --sky-pale: #e8f6fc;
-  --font-display: 'Fraunces Variable', Georgia, serif;
-  --font-body: 'DM Sans Variable', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Move Sans', 'Montserrat', sans-serif;
+  --font-body: 'Montserrat', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --ease: cubic-bezier(.2, .75, .25, 1);
   color-scheme: light;
 }
@@ -33,7 +53,7 @@ button, a, input, textarea { -webkit-tap-highlight-color: transparent; }
 .daily-menu .daily-type-choice { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; margin-bottom: 14px; }
 .daily-menu .daily-type-choice button { min-width: 0; min-height: 40px; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 2px 6px; padding: 6px; border: 1px solid #b8d6aa; border-radius: 7px; color: var(--leaf-dark); background: #fff; font-size: .7rem; font-weight: 850; cursor: pointer; transition: background .2s ease, border-color .2s ease; }
 .daily-menu .daily-type-choice button:hover { background: var(--leaf-pale); }
-.daily-menu .daily-type-choice button.selected { border-color: var(--leaf-dark); color: #fff; background: var(--leaf); }
+.daily-menu .daily-type-choice button.selected { border-color: var(--leaf-dark); color: #fff; background: var(--leaf); box-shadow: inset 0 -3px var(--lime); }
 .daily-menu .daily-type-choice button strong { font-size: .71rem; white-space: nowrap; }
 .daily-layout.has-selection { display: grid; grid-template-columns: minmax(0, 1fr) minmax(330px, 360px); align-items: start; gap: 22px; }
 .daily-layout.has-selection .daily-options { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -46,14 +66,12 @@ button, a, input, textarea { -webkit-tap-highlight-color: transparent; }
 .daily-draft-select { position: relative; width: 100%; display: grid; gap: 5px; padding: 14px 65px 14px 14px; border: 0; border-radius: 9px; color: var(--ink); background: transparent; text-align: left; cursor: pointer; }
 .daily-draft-select:hover, .daily-draft-select:focus-visible { background: #d9ebd2; }
 .daily-draft-main-name { font-size: .81rem; line-height: 1.3; }
-.menu-section-picker button:not(.selected):not(.menu-day-button) { border-color: #b8dce9; color: #24698f; background: #f1faff; }
-.menu-section-picker button:not(.selected):not(.menu-day-button) .picker-icon { color: var(--teal); background: #e3f4fa; }
 .menu-shell .category-list .category-section { position: relative; isolation: isolate; padding: 28px; border: 1px solid #cfe7dc; border-radius: 22px; background: linear-gradient(145deg, #f9fefd, #e8f6fc); box-shadow: 0 10px 30px rgba(40, 111, 91, .045); }
 .menu-shell .category-list .category-section:nth-child(even) { border-color: #d2e8c8; background: linear-gradient(145deg, #fbfef9, #eaf7dc); }
 .menu-shell .category-list .category-section::before { content: ''; position: absolute; top: 13px; right: 28px; width: 120px; height: 12px; opacity: .55; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='12' viewBox='0 0 120 12'%3E%3Cpath d='M0 6 C15 0 15 0 30 6 S45 12 60 6 S75 0 90 6 S105 12 120 6' fill='none' stroke='%2349A8D1' stroke-width='3'/%3E%3C/svg%3E") no-repeat; pointer-events: none; }
 .menu-shell .category-list .category-section:nth-child(even)::before { opacity: .7; filter: hue-rotate(90deg); }
 .menu-shell .category-list .category-heading { position: relative; border-bottom-color: #c8e1dc; }
-.menu-shell .category-list .category-heading::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 126px; height: 3px; border-radius: 999px; background: linear-gradient(90deg, var(--sky), var(--coral)); }
+.menu-shell .category-list .category-heading::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 126px; height: 3px; border-radius: 999px; background: linear-gradient(90deg, var(--sky), var(--lime), var(--leaf)); }
 .menu-shell .category-list .category-section:nth-child(odd) .category-title h3, .menu-shell .category-list .category-section:nth-child(odd) .category-index { color: #246f96; }
 .menu-shell .category-list .category-section:nth-child(even) .category-title h3 { color: var(--leaf-dark); }
 .menu-shell .daily-course { min-width: 0; padding: 18px; border: 1px solid #cfe8d2; border-radius: 22px; background: linear-gradient(145deg, #eaf7dc 0%, #f8fdf5 58%, #e8f6fc 100%); }
@@ -65,3 +83,4 @@ button, a, input, textarea { -webkit-tap-highlight-color: transparent; }
 @media (max-width: 760px) { .daily-layout.has-selection { display: block; }.daily-layout.has-selection .daily-options { grid-template-columns: 1fr; }.daily-mobile-builder { display: block; }.daily-desktop-builder { display: none; } }
 @media (max-width: 760px) { .daily-option .product-footer { flex-wrap: wrap; gap: 7px; }.daily-option .price { width: 100%; font-size: .86rem; }.daily-option .add-button, .daily-option .stepper { margin-left: auto; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
+.catalog-sync-notice { margin: 0 0 18px; padding: 12px 16px; border: 1px solid #b9d9bd; border-radius: 10px; background: #f4fbf0; color: #285b38; font-size: .8rem; font-weight: 700; }

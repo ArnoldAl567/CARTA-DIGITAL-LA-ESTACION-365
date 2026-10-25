@@ -1,7 +1,7 @@
 .product-card { height: 100%; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #cbe0d2; border-radius: 16px; background: #fff; box-shadow: 0 7px 23px rgba(40, 94, 57, .07); transition: transform .25s var(--ease), box-shadow .25s var(--ease), border-color .25s ease; }
 .product-card:hover, .product-card:focus-within { border-color: #8bc581; transform: translateY(-3px); box-shadow: 0 18px 36px rgba(38, 99, 43, .14); }
 .product-image-wrap { position: relative; height: 236px; overflow: hidden; background: #e8f6fc; }
-.product-image-wrap::after { content: ''; position: absolute; inset: auto 0 0; height: 4px; background: linear-gradient(90deg, var(--sky), var(--coral-light), var(--leaf)); opacity: .78; }
+.product-image-wrap::after { content: ''; position: absolute; inset: auto 0 0; height: 4px; background: linear-gradient(90deg, var(--sky), var(--lime), var(--leaf)); opacity: .78; }
 .product-image { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .45s var(--ease); }
 .product-card:hover .product-image { transform: scale(1.045); }
 .badge { position: absolute; top: 12px; left: 12px; max-width: calc(100% - 24px); padding: 7px 10px; border-radius: 5px; color: #fff; background: var(--leaf); font-size: .66rem; font-weight: 850; letter-spacing: .035em; }
@@ -14,7 +14,7 @@ p { min-height: 47px; margin: 9px 0 14px; color: var(--muted); font-size: .81rem
 .price { color: var(--leaf-dark); font-size: 1.04rem; font-weight: 850; white-space: nowrap; }
 .add-button { min-width: 111px; min-height: 39px; display: flex; align-items: center; justify-content: space-between; gap: 13px; padding: 0 6px 0 13px; border: 1px solid var(--leaf); border-radius: 6px; color: #fff; background: var(--leaf); font-size: .73rem; font-weight: 800; cursor: pointer; transition: background .2s ease, transform .2s ease; }
 .add-button:hover { background: var(--leaf-dark); transform: translateY(-1px); }
-.add-button span:last-child { width: 27px; height: 27px; display: grid; place-items: center; border-radius: 4px; color: var(--leaf-dark); background: #d9f6bd; font-size: 1.15rem; line-height: 1; }
+.add-button span:last-child { width: 27px; height: 27px; display: grid; place-items: center; border-radius: 4px; color: var(--leaf-dark); background: var(--lime); font-size: 1.15rem; line-height: 1; }
 .add-button.added span:last-child { animation: add-pop .35s var(--ease); }
 .stepper { height: 39px; display: flex; align-items: center; overflow: hidden; border: 1px solid #a8cd9b; border-radius: 6px; color: var(--leaf-dark); background: var(--leaf-pale); }
 .stepper button { width: 38px; height: 38px; border: 0; color: var(--leaf-dark); background: transparent; font-size: 1.2rem; cursor: pointer; }.stepper button:hover { background: #d6eac7; }

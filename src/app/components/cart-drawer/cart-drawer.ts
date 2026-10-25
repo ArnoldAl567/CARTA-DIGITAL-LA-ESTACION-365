@@ -14,6 +14,7 @@ import { CartService } from '../../services/cart.service';
 })
 export class CartDrawer implements OnChanges, OnDestroy {
   readonly open = input.required<boolean>();
+  readonly orderEnabled = input(true);
   readonly closed = output<void>();
   readonly submitted = signal(false);
   readonly errorMessage = signal('');
@@ -76,6 +77,7 @@ export class CartDrawer implements OnChanges, OnDestroy {
   orderTotal(): number { return this.cart.total() + this.packagingTotal(); }
 
   sendOrder(): void {
+    if (!this.orderEnabled()) { this.errorMessage.set('La carta aún no está actualizada. Inténtalo nuevamente en un momento.'); return; }
     this.submitted.set(true);
     this.errorMessage.set('');
     if (!this.cart.items().length) { this.errorMessage.set('Agrega al menos un plato para continuar.'); return; }

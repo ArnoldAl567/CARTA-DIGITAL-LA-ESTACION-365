@@ -21,7 +21,7 @@ export class CartService {
       const products = this.menu.products();
       this.items.update(items => items.flatMap(item => {
         const product = products.find(current => current.id === item.product.id) ??
-          dailyMenuProductById(item.product.id, this.menu.dailyStarters(), this.menu.dailyMains());
+          dailyMenuProductById(item.product.id, this.menu.dailyStarters(), this.menu.dailyMains(), this.menu.dailyPrices());
         return product && product.price !== null && product.active !== false ? [{ ...item, product }] : [];
       }));
     });
@@ -52,7 +52,7 @@ export class CartService {
         if (!entry || typeof entry !== 'object') return [];
         const item = entry as Partial<CartItem>;
         const product = this.menu.products().find(current => current.id === item.product?.id) ??
-          dailyMenuProductById(item.product?.id ?? '', this.menu.dailyStarters(), this.menu.dailyMains());
+          dailyMenuProductById(item.product?.id ?? '', this.menu.dailyStarters(), this.menu.dailyMains(), this.menu.dailyPrices());
         if (!product || product.price === null) return [];
         const quantity = Math.min(99, Math.max(1, Math.trunc(Number(item.quantity) || 1)));
         return [{ product, quantity, notes: typeof item.notes === 'string' ? item.notes.slice(0, 100) : '' }];

@@ -64,6 +64,7 @@ const MENU_ENTRIES: Product[] = [
   { id: 'cecina-chorizo-platano', categoryId: 'mix', name: 'Cecina + chorizo + plátano', price: 20 },
   { id: 'chaufa-cecina', categoryId: 'mix', name: 'Chaufa de cecina', price: 18 },
   { id: 'patacones-cecina-chorizo', categoryId: 'mix', name: 'Patacones + cecina + chorizo', price: 20 },
+  { id: 'alitas-bbq-papas-nativas', categoryId: 'mix', name: 'Alitas BBQ con papas nativas', price: 18 },
 
   { id: 'alita-broaster', categoryId: 'broaster', name: 'Alita broaster', price: 10 },
   { id: 'alita-papa-chaufa', categoryId: 'broaster', name: 'Alita + papa + chaufa', price: 14 },

@@ -1,4 +1,5 @@
 import { Product } from '../models/menu.models';
+import { DailyPrices, DEFAULT_DAILY_PRICES } from '../models/catalog.models';
 
 export const DAILY_MENU_TYPES = {
   economico: { label: 'Económico', price: 12 },
@@ -46,7 +47,7 @@ export const DAILY_MAINS: DailyDish[] = [
 // Los ID anteriores no incluían tipo; conservar su precio al recuperar carritos guardados.
 const LEGACY_EXECUTIVE_MAINS = new Set(['arroz-mariscos', 'tallarin-verde-chuleta', 'seco-res-frijol-panamito', 'picante-carne-huevo-frito', 'lomo-saltado', 'pescado-frito-frijol', 'chuleta-papas-fritas']);
 
-export function dailyMenuProduct(mainId: string, starterId: string, type: DailyMenuType, starters = DAILY_STARTERS, mains = DAILY_MAINS): Product | null {
+export function dailyMenuProduct(mainId: string, starterId: string, type: DailyMenuType, starters = DAILY_STARTERS, mains = DAILY_MAINS, prices: DailyPrices = DEFAULT_DAILY_PRICES): Product | null {
   const main = mains.find(dish => dish.id === mainId && dish.active !== false);
   const starter = starters.find(dish => dish.id === starterId && dish.active !== false);
   if (!main || !starter) return null;
@@ -54,15 +55,15 @@ export function dailyMenuProduct(mainId: string, starterId: string, type: DailyM
     id: `menu-dia__${main.id}__${starter.id}__${type}`,
     categoryId: 'menu-dia',
     name: `Menú ${DAILY_MENU_TYPES[type].label}: ${main.name} + ${starter.name}`,
-    price: DAILY_MENU_TYPES[type].price,
+    price: prices[type],
     image: main.image,
     imageAlt: main.name,
   };
 }
 
-export function dailyMenuProductById(id: string, starters = DAILY_STARTERS, mains = DAILY_MAINS): Product | null {
+export function dailyMenuProductById(id: string, starters = DAILY_STARTERS, mains = DAILY_MAINS, prices: DailyPrices = DEFAULT_DAILY_PRICES): Product | null {
   const match = /^menu-dia__([^_]+)__([^_]+)(?:__(economico|ejecutivo))?$/.exec(id);
   if (!match) return null;
   const type = match[3] as DailyMenuType | undefined ?? (LEGACY_EXECUTIVE_MAINS.has(match[1]) ? 'ejecutivo' : 'economico');
-  return dailyMenuProduct(match[1], match[2], type, starters, mains);
+  return dailyMenuProduct(match[1], match[2], type, starters, mains, prices);
 }

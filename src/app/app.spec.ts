@@ -4,12 +4,13 @@ import { App } from './app';
 import { CATEGORIES, PRODUCTS } from './data/menu.data';
 import { dailyMenuProduct, DAILY_MAINS, DAILY_STARTERS } from './data/daily-menu.data';
 import { MenuService } from './services/menu.service';
+import { DEFAULT_DAILY_PRICES } from './models/catalog.models';
 
 describe('App', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [App],
-      providers: [{ provide: MenuService, useValue: { categories: signal(CATEGORIES), products: signal(PRODUCTS), dailyStarters: signal(DAILY_STARTERS), dailyMains: signal(DAILY_MAINS) } }],
+      providers: [{ provide: MenuService, useValue: { categories: signal(CATEGORIES), products: signal(PRODUCTS), dailyStarters: signal(DAILY_STARTERS), dailyMains: signal(DAILY_MAINS), dailyPrices: signal(DEFAULT_DAILY_PRICES), ready: signal(true), syncError: signal('') } }],
     }).compileComponents();
   });
 

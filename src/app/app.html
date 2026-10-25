@@ -10,6 +10,9 @@
   <main id="carta" tabindex="-1">
     <div class="menu-shell">
       <h2 class="visually-hidden">La carta</h2>
+      @if (!menu.ready()) {
+        <p class="catalog-sync-notice" role="status">{{ menu.syncError() || 'Estamos actualizando la carta y los precios…' }}</p>
+      }
 
       <div class="menu-section-picker" role="group" aria-label="Tipo de carta">
         <button class="menu-day-button" type="button" [class.selected]="activeSection() === 'menu-dia'" [attr.aria-pressed]="activeSection() === 'menu-dia'" (click)="activeSection.set('menu-dia')">
@@ -87,7 +90,7 @@
               <div class="product-grid daily-options">
                 @for (product of dailyMainProducts(); track product.id) {
                   <div class="daily-option-group">
-                    <app-product-card class="daily-option" [product]="product" [quantity]="dailyMainCounts().get(product.id) ?? 0" [priceLabel]="'S/ ' + dailyMenuTypes.economico.price + ' o S/ ' + dailyMenuTypes.ejecutivo.price" statusLabel="En tu menú" addContext="al menú del día" [addDisabled]="dailyDrafts().length >= 99" (added)="addDailyMain($event.id)" (decreased)="decreaseDailyMain($event.id)" />
+                    <app-product-card class="daily-option" [product]="product" [quantity]="dailyMainCounts().get(product.id) ?? 0" [priceLabel]="'S/ ' + dailyPrices().economico + ' o S/ ' + dailyPrices().ejecutivo" statusLabel="En tu menú" addContext="al menú del día" [addDisabled]="dailyDrafts().length >= 99" (added)="addDailyMain($event.id)" (decreased)="decreaseDailyMain($event.id)" />
                     @if (draftsForMain(product.id); as drafts) {
                       @if (drafts.length) {
                         <div class="daily-mobile-builder">
@@ -129,8 +132,8 @@
                       <div class="daily-draft-heading"><span>MENÚ {{ i + 1 }} · {{ draft.typeLabel }}</span><button type="button" (click)="removeDailyDraft(draft.id)" [attr.aria-label]="'Quitar menú ' + (i + 1) + ' de ' + draft.mainName">Quitar</button></div>
                     }
                     <div class="daily-type-choice" role="group" [attr.aria-label]="'Tipo del menú ' + (i + 1) + ' de ' + draft.mainName">
-                      <button type="button" [class.selected]="draft.type === 'economico'" [attr.aria-pressed]="draft.type === 'economico'" (click)="setDailyType(draft.id, 'economico')">Económico <strong>S/ {{ dailyMenuTypes.economico.price }}</strong></button>
-                      <button type="button" [class.selected]="draft.type === 'ejecutivo'" [attr.aria-pressed]="draft.type === 'ejecutivo'" (click)="setDailyType(draft.id, 'ejecutivo')">Ejecutivo <strong>S/ {{ dailyMenuTypes.ejecutivo.price }}</strong></button>
+                      <button type="button" [class.selected]="draft.type === 'economico'" [attr.aria-pressed]="draft.type === 'economico'" (click)="setDailyType(draft.id, 'economico')">Económico <strong>S/ {{ dailyPrices().economico }}</strong></button>
+                      <button type="button" [class.selected]="draft.type === 'ejecutivo'" [attr.aria-pressed]="draft.type === 'ejecutivo'" (click)="setDailyType(draft.id, 'ejecutivo')">Ejecutivo <strong>S/ {{ dailyPrices().ejecutivo }}</strong></button>
                     </div>
                     <span class="daily-starter-label">Entrada para este fondo</span>
                     <button type="button" class="daily-starter-toggle" [attr.aria-expanded]="openStarterPickerId() === draft.id" [attr.aria-controls]="'daily-starters-' + scope + '-' + draft.id" (click)="toggleStarterPicker(draft.id)">
@@ -239,5 +242,5 @@
     </button>
   }
 
-  <app-cart-drawer [open]="cartOpen()" (closed)="cartOpen.set(false)" />
+  <app-cart-drawer [open]="cartOpen()" [orderEnabled]="menu.ready()" (closed)="cartOpen.set(false)" />
 </div>

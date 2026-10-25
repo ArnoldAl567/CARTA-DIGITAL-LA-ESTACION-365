@@ -1,6 +1,6 @@
 # La Estación 365 — carta digital
 
-Carta pública creada con Angular. Incluye platos a la carta, menú del día, búsqueda, carrito y preparación del pedido por WhatsApp. Los datos y las imágenes se sirven desde este proyecto; no hay conexión a un CMS, API ni base de datos.
+Carta pública creada con Angular. Incluye platos a la carta, menú del día, búsqueda, carrito y preparación del pedido por WhatsApp. El panel `/panel-administrativo` permite actualizar el catálogo en PostgreSQL mediante Neon Auth y Data API, sin alojar un servidor Laravel.
 
 ## Ejecutar el proyecto
 
@@ -11,12 +11,29 @@ Requiere Node.js y npm. En la raíz del proyecto:
 3. `npm run build` para generar el sitio estático en `dist/sabor-a-mar/browser/`
 4. `npm test -- --watch=false --browsers=ChromeHeadless` para ejecutar las pruebas
 
-El sitio compilado puede publicarse en un alojamiento para archivos estáticos. Los cambios de la carta requieren volver a compilar y publicar el frontend.
+El sitio compilado puede publicarse en un alojamiento para archivos estáticos. Cuando Neon está conectado, los cambios hechos en el panel aparecen en la carta sin recompilar el frontend. `vercel.json` permite abrir directamente `/panel-administrativo` en Vercel.
+
+## Conexión actual con Neon
+
+El proyecto Neon **`young-cell-49382492`**, rama **production**, base **neondb**, ya tiene Neon Auth, Data API, las tablas y las reglas de acceso. Se cargaron **47 productos a la carta, 13 fondos y 7 entradas**. Las dos URL públicas están en [`src/app/config/neon.config.ts`](src/app/config/neon.config.ts). La carta lee los datos desde Neon y actualiza una pestaña abierta al recuperar el foco o, como máximo, unos 30 segundos después.
+
+Para acceder a `/panel-administrativo`, escribe el correo autorizado y usa **Crear o recuperar contraseña**. Neon envía un enlace al correo; ábrelo y elige la contraseña directamente en la página. No compartas esa contraseña. El enlace solo funciona si la dirección de la carta está autorizada en **Neon Auth → Domains**. Tras crear la contraseña, inicia sesión en el panel.
+
+Si alguna vez se configura otro proyecto Neon:
+
+1. Activa **Neon Auth (Managed Better Auth)** y **Postgres database → Data API** en la misma rama y base de datos.
+2. Ejecuta [`neon/schema.sql`](neon/schema.sql) y luego [`neon/seed.sql`](neon/seed.sql) en SQL Editor. El segundo archivo carga los 67 productos sin sobrescribir ediciones existentes. Tras cambios de estructura, pulsa **Refresh schema cache** en Data API.
+3. Crea la cuenta en Neon Auth y autoriza su identificador con `insert into public.catalog_admins (user_id) select id from neon_auth."user" where email = 'CORREO-ADMIN' on conflict do nothing;`. El panel no ofrece registro público y las reglas de PostgreSQL impiden que otras cuentas editen el catálogo.
+4. Agrega `http://127.0.0.1:4200` y el dominio real de producción a **Neon Auth → Domains**. Copia las dos URL públicas en [`src/app/config/neon.config.ts`](src/app/config/neon.config.ts). Nunca pongas la contraseña PostgreSQL, una cadena `postgresql://` o una API key secreta en Angular o Git.
+
+En el panel puedes cambiar nombre, precio y disponibilidad de cada producto a la carta; nombre, fotografía y disponibilidad de fondos y entradas; y los precios globales de los menús Económico y Ejecutivo. Las fotografías JPG, PNG o WebP de hasta 5 MB se convierten en WebP de máximo 180 KB y se guardan en PostgreSQL junto al producto. Esto evita contratar almacenamiento adicional para este catálogo pequeño; si se cambian muchas fotos con frecuencia, conviene migrarlas a Neon Object Storage. Los cambios se muestran al volver a abrir la carta; una carta que ya está abierta se actualiza al recuperar el foco o como máximo unos 30 segundos después.
+
+Para regenerar el archivo de carga a partir de los platos incluidos en Angular, ejecuta `node scripts/generate-neon-seed.cjs`. Si cambias el catálogo directamente en Neon, no vuelvas a ejecutar la carga: el archivo solo añade claves faltantes y no reemplaza filas editadas.
 
 ## Editar platos y disponibilidad
 
-- **Platos a la carta y bebidas:** modifica `src/app/data/menu.data.ts`. Cada producto tiene nombre, precio, imagen y categoría. Para ocultar un producto, establece `active: false`; para mostrarlo, usa `active: true` o elimina esa propiedad. Sus imágenes están en `public/images/menu/`.
-- **Menú del día:** modifica `src/app/data/daily-menu.data.ts`. Las entradas están en `DAILY_STARTERS` y los fondos en `DAILY_MAINS`. Cada fondo puede pedirse como menú Económico (S/ 12) o Ejecutivo (S/ 14); el tipo se elige para cada ración. Se puede ocultar con `active: false`. Sus imágenes están en `public/images/daily/`.
+- **Con Neon conectado:** usa `/panel-administrativo` para editar los datos publicados; no hace falta desplegar otra vez la web para cada cambio.
+- **Sin Neon:** los datos de respaldo están en `src/app/data/menu.data.ts` y `src/app/data/daily-menu.data.ts`. Editarlos requiere volver a compilar y publicar. Sus imágenes están en `public/images/menu/` y `public/images/daily/`.
 - Las fotografías del menú del día son ilustrativas. Sustitúyelas por fotografías reales del restaurante cuando estén disponibles.
 
 El menú Económico cuesta S/ 12 y el Ejecutivo S/ 14, con cualquiera de los fondos disponibles. Los precios de bebidas son provisionales.

@@ -18,7 +18,7 @@ interface DailyDraft { id: number; mainId: string; starterId: string | null; typ
 const normalizeSearch = (value: string): string => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('es-PE');
 
 @Component({
-  selector: 'app-root',
+  selector: 'app-menu',
   imports: [FormsModule, NgTemplateOutlet, SiteHeader, Hero, ProductCard, CartDrawer],
   templateUrl: './app.html',
   styleUrl: './app.scss'
@@ -31,13 +31,14 @@ export class App {
   readonly dailyStarters = this.menu.dailyStarters;
   readonly dailyMains = this.menu.dailyMains;
   readonly dailyMenuTypes = DAILY_MENU_TYPES;
+  readonly dailyPrices = this.menu.dailyPrices;
   readonly dailySearchTerm = signal('');
   readonly filteredDailyMains = computed(() => {
     const search = normalizeSearch(this.dailySearchTerm().trim());
     return search ? this.dailyMains().filter(dish => normalizeSearch(dish.name).includes(search)) : this.dailyMains();
   });
   readonly dailyMainProducts = computed<Product[]>(() => this.filteredDailyMains()
-    .map(dish => ({ id: dish.id, categoryId: 'menu-dia', name: dish.name, price: DAILY_MENU_TYPES.economico.price, image: dish.image, imageAlt: dish.name })));
+    .map(dish => ({ id: dish.id, categoryId: 'menu-dia', name: dish.name, price: this.dailyPrices().economico, image: dish.image, imageAlt: dish.name })));
   readonly activeSection = signal<'carta' | 'menu-dia'>('menu-dia');
   readonly dailyDrafts = signal<DailyDraft[]>([]);
   readonly expandedDailyDraftId = signal<number | null>(null);
@@ -53,7 +54,7 @@ export class App {
     return { ...draft, mainName: main?.name ?? 'Fondo no disponible', mainImage: main?.image,
       typeLabel: DAILY_MENU_TYPES[draft.type].label,
       starterName: starter?.name, starterImage: starter?.image,
-      price: main ? DAILY_MENU_TYPES[draft.type].price : null, available: !!main };
+      price: main ? this.dailyPrices()[draft.type] : null, available: !!main };
   }));
   readonly dailyDraftTotal = computed(() => this.preparedDailyMenus().reduce((sum, draft) => sum + (draft.price ?? 0), 0));
   readonly canAddDailyMenus = computed(() => this.preparedDailyMenus().length > 0 &&
@@ -126,7 +127,7 @@ export class App {
   addDailyMenus(): void {
     if (!this.canAddDailyMenus()) return;
     for (const draft of this.dailyDrafts()) {
-      const product = dailyMenuProduct(draft.mainId, draft.starterId!, draft.type, this.dailyStarters(), this.dailyMains());
+      const product = dailyMenuProduct(draft.mainId, draft.starterId!, draft.type, this.dailyStarters(), this.dailyMains(), this.dailyPrices());
       if (product) this.cart.add(product);
     }
     this.dailyDrafts.set([]);
@@ -137,7 +138,7 @@ export class App {
     if (!this.canAddDailyMenusForMain(mainId)) return;
     const drafts = this.dailyDrafts().filter(draft => draft.mainId === mainId);
     for (const draft of drafts) {
-      const product = dailyMenuProduct(draft.mainId, draft.starterId!, draft.type, this.dailyStarters(), this.dailyMains());
+      const product = dailyMenuProduct(draft.mainId, draft.starterId!, draft.type, this.dailyStarters(), this.dailyMains(), this.dailyPrices());
       if (product) this.cart.add(product);
     }
     this.dailyDrafts.update(current => current.filter(draft => draft.mainId !== mainId));

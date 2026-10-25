@@ -1,6 +1,6 @@
 :host { display: block; }
 .site-header { position: relative; background: linear-gradient(108deg, #fff 28%, #f4fbef 73%, #e8f6fc); box-shadow: 0 8px 26px rgba(45, 106, 61, .045); }
-.site-header::after { content: ''; position: absolute; inset: auto 0 0; height: 4px; background: linear-gradient(90deg, var(--sky) 0%, var(--coral-light) 30%, var(--leaf) 72%, var(--sky) 100%); }
+.site-header::after { content: ''; position: absolute; inset: auto 0 0; height: 4px; background: linear-gradient(90deg, var(--sky) 0%, var(--lime) 30%, var(--leaf) 72%, var(--sky) 100%); }
 .header-inner { max-width: 1360px; height: 76px; padding: 0 36px; margin: auto; display: flex; align-items: center; gap: 40px; }
 .brand { display: inline-flex; align-items: center; gap: 11px; color: var(--ink); text-decoration: none; min-width: max-content; }
 .brand-logo { width: 194px; height: 62px; display: block; object-fit: contain; }
@@ -15,6 +15,6 @@
 .order-button { min-height: 43px; display: inline-flex; align-items: center; gap: 9px; padding: 5px 6px 5px 15px; border: 1px solid var(--leaf); border-radius: 999px; color: #fff; background: linear-gradient(120deg, var(--leaf), var(--leaf-dark)); box-shadow: 0 7px 18px rgba(40, 95, 49, .16); font-size: .79rem; font-weight: 800; cursor: pointer; white-space: nowrap; transition: box-shadow .2s ease, transform .2s ease; }
 .order-button:hover { box-shadow: 0 11px 22px rgba(40, 95, 49, .24); transform: translateY(-2px); }
 .order-button svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-.count { min-width: 31px; height: 31px; padding: 0 7px; display: grid; place-items: center; border-radius: 50%; color: var(--leaf-dark); background: #d9f6bd; font-size: .78rem; }
+.count { min-width: 31px; height: 31px; padding: 0 7px; display: grid; place-items: center; border-radius: 50%; color: var(--leaf-dark); background: var(--lime); font-size: .78rem; }
 @media (max-width: 740px) { .header-inner { height: 66px; padding: 0 17px; gap: 12px; }.header-nav { display: none; }.brand { margin-right: auto; }.brand-logo { width: 150px; height: 52px; }.order-button { width: 42px; min-height: 42px; padding: 0; display: grid; place-items: center; position: relative; }.order-button svg { display: block; width: 20px; height: 20px; }.order-button > span { display: none; }.count { position: absolute; top: -5px; right: -5px; min-width: 19px; height: 19px; padding: 0 4px; border: 2px solid #fff; font-size: .65rem; } }
 @media (prefers-reduced-motion: reduce) { .order-button { transition: none; } }
