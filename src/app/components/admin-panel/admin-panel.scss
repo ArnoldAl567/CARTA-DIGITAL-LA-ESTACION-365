@@ -109,8 +109,9 @@ h1, h2 { font-family: var(--font-display); }
 .login-card form { position: relative; display: grid; gap: 8px; }
 .login-card input { margin-bottom: 12px; }
 .password-field { position: relative; margin-bottom: 12px; }
-.login-card .password-field input { margin-bottom: 0; padding-right: 88px; }
-.password-toggle { position: absolute; top: 50%; right: 7px; transform: translateY(-50%); min-height: 30px; padding: 0 10px; border: 0; border-radius: 6px; color: var(--leaf-dark); background: var(--leaf-pale); font: inherit; font-size: .7rem; font-weight: 850; cursor: pointer; }
+.login-card .password-field input { margin-bottom: 0; padding-right: 52px; }
+.password-toggle { position: absolute; top: 50%; right: 5px; transform: translateY(-50%); width: 36px; height: 36px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 7px; color: var(--leaf-dark); background: var(--leaf-pale); cursor: pointer; }
+.password-toggle svg { display: block; width: 20px; height: 20px; }
 .password-toggle:hover { background: #dcefd4; }
 .password-toggle:focus-visible { outline: 2px solid var(--leaf); outline-offset: 2px; }
 .login-card .form-error { margin: 0 0 7px; padding: 10px; border-radius: 7px; font-size: .74rem; }
