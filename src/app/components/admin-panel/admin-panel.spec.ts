@@ -82,4 +82,25 @@ describe('AdminPanel', () => {
     expect(api.signIn).toHaveBeenCalledWith(ADMIN_LOGIN.email, 'clave-de-prueba');
     expect(login.authenticated()).toBeTrue();
   });
+
+  it('shows and hides the login password without submitting the form', async () => {
+    api.restoreAdminSession.and.resolveTo(false);
+    const loginFixture = TestBed.createComponent(AdminPanel);
+    loginFixture.detectChanges();
+    await loginFixture.whenStable();
+    loginFixture.detectChanges();
+    const root = loginFixture.nativeElement as HTMLElement;
+    const input = root.querySelector<HTMLInputElement>('#admin-password')!;
+    const toggle = root.querySelector<HTMLButtonElement>('.password-toggle')!;
+    expect(input.type).toBe('password');
+    expect(toggle.getAttribute('aria-label')).toBe('Mostrar contraseña');
+    toggle.click();
+    loginFixture.detectChanges();
+    expect(input.type).toBe('text');
+    expect(toggle.getAttribute('aria-label')).toBe('Ocultar contraseña');
+    toggle.click();
+    loginFixture.detectChanges();
+    expect(input.type).toBe('password');
+    expect(api.signIn).not.toHaveBeenCalled();
+  });
 });

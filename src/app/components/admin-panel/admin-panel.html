@@ -37,7 +37,10 @@
             <label for="admin-username">Usuario</label>
             <input id="admin-username" name="username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="40" required [(ngModel)]="username" placeholder="Ingresa tu usuario">
             <label for="admin-password">Contraseña</label>
-            <input id="admin-password" name="password" type="password" autocomplete="current-password" required [(ngModel)]="password" placeholder="••••••••">
+            <div class="password-field">
+              <input id="admin-password" name="password" [type]="showPassword ? 'text' : 'password'" autocomplete="current-password" required [(ngModel)]="password" placeholder="••••••••">
+              <button class="password-toggle" type="button" [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'" [attr.aria-pressed]="showPassword" (click)="showPassword = !showPassword">{{ showPassword ? 'Ocultar' : 'Ver' }}</button>
+            </div>
             @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
             <button class="primary-button" type="submit" [disabled]="busy()">{{ busy() ? 'Ingresando…' : 'Entrar al panel' }} <span aria-hidden="true">→</span></button>
             <button class="reset-link" type="button" [disabled]="busy()" (click)="requestPasswordReset()">Crear o recuperar contraseña</button>

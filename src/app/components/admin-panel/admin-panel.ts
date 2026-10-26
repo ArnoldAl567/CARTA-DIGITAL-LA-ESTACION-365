@@ -45,6 +45,7 @@ export class AdminPanel implements OnInit, OnDestroy {
   priceForm: DailyPrices = { ...DEFAULT_DAILY_PRICES };
   username = '';
   password = '';
+  showPassword = false;
   resetPassword = '';
   resetPasswordConfirmation = '';
   readonly resetToken = new URLSearchParams(window.location.search).get('token') ?? '';
