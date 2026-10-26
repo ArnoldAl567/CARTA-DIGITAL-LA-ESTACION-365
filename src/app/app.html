@@ -26,6 +26,10 @@
         </button>
       </div>
 
+      @if (!businessOpen()) {
+        <div class="closed-notice" role="status"><span class="closed-notice-dot" aria-hidden="true"></span><strong>Restaurante cerrado</strong><span>Los pedidos se habilitan a las 11:00 a. m.</span></div>
+      }
+
       @if (activeSection() === 'carta') {
       <div class="menu-controls">
         <label class="search-box">
@@ -211,8 +215,8 @@
               <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
             </span>
             <h2 id="footer-hours-title">Horario de atención</h2>
-            <div class="footer-hours"><span>Lunes a viernes</span><strong>{{ config.weekdayHours }}</strong></div>
-            <div class="footer-hours"><span>Sábado y domingo</span><strong>{{ config.weekendHours }}</strong></div>
+            <div class="footer-hours"><span>Lunes a sábado</span><strong>{{ config.mondaySaturdayHours }}</strong></div>
+            <div class="footer-hours"><span>Domingo</span><strong>{{ config.sundayHours }}</strong></div>
           </section>
 
           <section class="footer-info-card footer-whatsapp" aria-labelledby="footer-whatsapp-title">
@@ -242,5 +246,5 @@
     </button>
   }
 
-  <app-cart-drawer [open]="cartOpen()" [orderEnabled]="menu.ready()" (closed)="cartOpen.set(false)" />
+  <app-cart-drawer [open]="cartOpen()" [orderEnabled]="menu.ready()" [businessOpen]="businessOpen()" (closed)="cartOpen.set(false)" />
 </div>

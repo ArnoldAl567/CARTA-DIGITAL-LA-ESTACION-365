@@ -42,6 +42,10 @@ Al elegir **retiro en local** o **entrega a domicilio**, el pedido suma **S/ 1 p
 
 El pedido ofrece **retiro en local**, **entrega a domicilio** y **pedido para mesa**. La opción de mesa se indica en el mensaje de WhatsApp sin solicitar un número de mesa y sin cargo por táper.
 
+## Horario de pedidos
+
+La carta muestra el horario de atención en la parte inferior: **lunes a sábado, 11:00 a. m. a 11:00 p. m.; domingo, 11:00 a. m. a 6:00 p. m.** Se evalúa siempre con la zona horaria de Perú (`America/Lima`). Fuera de esas horas aparece «Restaurante cerrado» y se deshabilita el envío del pedido por WhatsApp. La comprobación se repite justo al pulsar el botón para impedir que se abra WhatsApp si el horario cambió mientras la carta estaba abierta.
+
 El menú del día aparece primero al abrir la carta. Puedes buscar los fondos por nombre incluso si se escribe sin tildes. Los fondos tienen tarjetas con **Agregar** y controles **− cantidad +**. En celular, el tipo (Económico o Ejecutivo) y la entrada aparecen debajo del plato seleccionado, y cada plato se añade al carrito desde allí. En escritorio, todas las raciones se editan juntas en un único panel lateral y se añaden al pedido con un solo botón. Cada ración puede tener una entrada diferente. Al bajar la cantidad, se retira la última ración añadida de ese fondo.
 
 ## Cambiar el número de WhatsApp

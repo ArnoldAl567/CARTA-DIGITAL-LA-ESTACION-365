@@ -7,12 +7,13 @@ describe('CartDrawer WhatsApp order', () => {
   const product: Product = { id: 'marinos-jalea-mixta', categoryId: 'marinos', name: 'Jalea mixta', price: 28 };
   const drink: Product = { id: 'bebidas-chicha', categoryId: 'bebidas', name: 'Chicha', price: 5 };
 
-  function createDrawer(items: CartItem[] = [{ product, quantity: 2, notes: 'Sin picante' }]): CartDrawer {
+  function createDrawer(items: CartItem[] = [{ product, quantity: 2, notes: 'Sin picante' }], at = new Date('2026-10-26T16:00:00Z')): CartDrawer {
     const cart = {
       items: () => items,
       total: () => items.reduce((sum, item) => sum + (item.product.price ?? 0) * item.quantity, 0),
     } as unknown as CartService;
     const drawer = TestBed.runInInjectionContext(() => new CartDrawer(cart));
+    spyOn(drawer, 'currentTime').and.returnValue(at);
     drawer.customer = { name: 'Ana Pérez', phone: '987654321', method: 'pickup', payment: 'yape', address: '', reference: '' };
     return drawer;
   }
@@ -103,5 +104,13 @@ describe('CartDrawer WhatsApp order', () => {
     const input = document.createElement('input');
     drawer.setPhone('+51 987 654 321', input);
     expect(drawer.customer.phone).toBe('987654321');
+  });
+
+  it('does not open WhatsApp outside business hours', () => {
+    const open = spyOn(window, 'open');
+    const drawer = createDrawer(undefined, new Date('2026-10-26T15:59:00Z'));
+    drawer.sendOrder();
+    expect(open).not.toHaveBeenCalled();
+    expect(drawer.errorMessage()).toContain('Restaurante cerrado');
   });
 });

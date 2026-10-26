@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { BUSINESS_CONFIG } from '../../data/menu.data';
 import { CustomerDetails } from '../../models/menu.models';
 import { CartService } from '../../services/cart.service';
+import { isBusinessOpen } from '../../services/business-hours';
 
 @Component({
   selector: 'app-cart-drawer',
@@ -15,6 +16,7 @@ import { CartService } from '../../services/cart.service';
 export class CartDrawer implements OnChanges, OnDestroy {
   readonly open = input.required<boolean>();
   readonly orderEnabled = input(true);
+  readonly businessOpen = input(true);
   readonly closed = output<void>();
   readonly submitted = signal(false);
   readonly errorMessage = signal('');
@@ -76,7 +78,10 @@ export class CartDrawer implements OnChanges, OnDestroy {
   packagingTotal(): number { return this.packagingItemCount() * this.config.packagingFeePerDish; }
   orderTotal(): number { return this.cart.total() + this.packagingTotal(); }
 
+  currentTime(): Date { return new Date(); }
+
   sendOrder(): void {
+    if (!isBusinessOpen(this.currentTime())) { this.errorMessage.set('Restaurante cerrado. Los pedidos se habilitan a las 11:00 a. m.'); return; }
     if (!this.orderEnabled()) { this.errorMessage.set('La carta aún no está actualizada. Inténtalo nuevamente en un momento.'); return; }
     this.submitted.set(true);
     this.errorMessage.set('');

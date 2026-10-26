@@ -1,6 +1,6 @@
 import { NgTemplateOutlet, registerLocaleData } from '@angular/common';
 import localeEsPe from '@angular/common/locales/es-PE';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, NgZone, OnDestroy, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CartDrawer } from './components/cart-drawer/cart-drawer';
 import { Hero } from './components/hero/hero';
@@ -11,6 +11,7 @@ import { BUSINESS_CONFIG } from './data/menu.data';
 import { CategoryId, Product } from './models/menu.models';
 import { CartService } from './services/cart.service';
 import { MenuService } from './services/menu.service';
+import { isBusinessOpen } from './services/business-hours';
 
 registerLocaleData(localeEsPe);
 
@@ -23,11 +24,17 @@ const normalizeSearch = (value: string): string => value.normalize('NFD').replac
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
-export class App {
+export class App implements OnDestroy {
   readonly menu = inject(MenuService);
   readonly cart = inject(CartService);
   readonly config = BUSINESS_CONFIG;
   readonly currentYear = new Date().getFullYear();
+  readonly businessOpen = signal(isBusinessOpen());
+  private readonly zone = inject(NgZone);
+  private readonly hoursTimer = this.zone.runOutsideAngular(() => window.setInterval(() => {
+    const open = isBusinessOpen();
+    if (open !== this.businessOpen()) this.zone.run(() => this.businessOpen.set(open));
+  }, 15_000));
   readonly dailyStarters = this.menu.dailyStarters;
   readonly dailyMains = this.menu.dailyMains;
   readonly dailyMenuTypes = DAILY_MENU_TYPES;
@@ -151,4 +158,5 @@ export class App {
     document.getElementById('carta')?.scrollIntoView({ behavior });
   }
   viewDrinks(): void { this.activeSection.set('carta'); this.selectCategory('bebidas'); this.scrollToMenu(); }
+  ngOnDestroy(): void { window.clearInterval(this.hoursTimer); }
 }

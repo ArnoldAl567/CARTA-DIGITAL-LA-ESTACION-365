@@ -1,4 +1,8 @@
 main { background: linear-gradient(180deg, #edf9f5 0%, #eef8e8 38%, #f4faef 100%); }
+.closed-notice { display: flex; align-items: center; flex-wrap: wrap; gap: 7px 10px; margin: 18px 0 0; padding: 12px 16px; border: 1px solid #aad0ba; border-radius: 12px; background: #f7fcf3; color: var(--leaf-dark); font-size: .84rem; }
+.closed-notice strong { font-weight: 800; }
+.closed-notice span:last-child { color: #536e60; }
+.closed-notice-dot { width: 9px; height: 9px; flex: none; border-radius: 50%; background: var(--leaf); }
 .menu-shell { max-width: 1272px; margin: auto; padding: 38px 32px 58px; }
 .menu-controls { position: sticky; top: 0; z-index: 25; display: flex; align-items: center; gap: 16px; padding: 12px 0; border-bottom: 1px solid #c9e4d8; background: rgba(239, 249, 238, .96); backdrop-filter: blur(16px); }
 .search-box { flex: 0 0 268px; height: 45px; display: flex; align-items: center; gap: 10px; padding: 0 13px; border: 1px solid #b9dae5; border-radius: 10px; background: #fff; box-shadow: 0 3px 12px rgba(41, 118, 134, .04); }.search-box:focus-within { border-color: var(--leaf); box-shadow: 0 0 0 3px rgba(112, 173, 66, .16); }.search-box svg { width: 18px; height: 18px; fill: none; stroke: var(--teal); stroke-width: 1.8; stroke-linecap: round; }.search-box input { width: 100%; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--ink); font-size: .82rem; }.search-box input::placeholder { color: #758d8b; }
