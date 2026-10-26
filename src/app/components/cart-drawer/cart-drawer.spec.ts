@@ -19,7 +19,7 @@ describe('CartDrawer WhatsApp order', () => {
 
   function sentMessage(open: jasmine.Spy): string {
     const url = open.calls.mostRecent().args[0] as string;
-    expect(url).toContain('api.whatsapp.com/send/?phone=51902586908');
+    expect(url).toContain('api.whatsapp.com/send/?phone=51987091127');
     expect(url).toContain('%F0%9F');
     expect(url).not.toContain('%EF%BF%BD');
     return new URL(url).searchParams.get('text') ?? '';

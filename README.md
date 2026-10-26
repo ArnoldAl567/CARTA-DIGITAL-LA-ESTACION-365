@@ -46,7 +46,7 @@ El menú del día aparece primero al abrir la carta. Puedes buscar los fondos po
 
 ## Cambiar el número de WhatsApp
 
-El contacto configurado actualmente es el **WhatsApp de IntegraTech: +51 902 586 908**. Los pedidos llegarán a ese número hasta que se configure el del restaurante. El pie de página y el pedido usan `BUSINESS_CONFIG` en `src/app/data/menu.data.ts`:
+El contacto configurado actualmente es el **WhatsApp del restaurante: +51 987 091 127**. El pie de página y el pedido usan `BUSINESS_CONFIG` en `src/app/data/menu.data.ts`:
 
 - `whatsapp`: código de país y número, solo dígitos, sin `+`, espacios ni guiones. Ejemplo: `51987654321`.
 - `displayWhatsapp`: el mismo número con formato legible. Ejemplo: `+51 987 654 321`.
