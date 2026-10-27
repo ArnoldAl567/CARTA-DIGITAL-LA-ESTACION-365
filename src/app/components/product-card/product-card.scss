@@ -33,6 +33,7 @@ p { min-height: 47px; margin: 9px 0 14px; color: var(--muted); font-size: .81rem
 @media (prefers-reduced-motion: reduce) { .product-card, .product-image, .add-button { transition: none; }.add-button.added span:last-child { animation: none; } }
 .product-card.text-only { min-height: 168px; }
 .text-only .product-copy { min-height: 168px; }
+@media (max-width: 760px) { .product-card.text-only { grid-template-columns: 1fr; } }
 .text-only h3 { max-width: 24ch; }
 .product-copy p { min-height: 0; }
 .price-on-request { color: var(--muted); font-size: .75rem; font-weight: 750; }

@@ -24,6 +24,30 @@ export const CATEGORIES: Category[] = [
   { id: 'bebidas', name: 'Bebidas', shortName: 'Bebidas', description: 'El acompañamiento perfecto para tu plato.' },
 ];
 
+export const DAILY_ADDON_CATEGORIES: Category[] = [
+  { id: 'entrada-adicional', name: 'Entradas adicionales', shortName: 'Entradas adicionales', description: 'Para sumar a tu menú.' },
+  { id: 'guarnicion', name: 'Guarniciones', shortName: 'Guarniciones', description: 'Acompaña tu plato como prefieras.' },
+];
+
+const DAILY_ADDONS: Product[] = [
+  { id: 'entrada-adicional-sopa-shambar', categoryId: 'entrada-adicional', name: 'Sopa Shambar', price: 5 },
+  { id: 'entrada-adicional-huancaina', categoryId: 'entrada-adicional', name: 'Huancaína', price: 5 },
+  { id: 'entrada-adicional-tamal', categoryId: 'entrada-adicional', name: 'Tamal', price: 5 },
+  { id: 'entrada-adicional-tequenos', categoryId: 'entrada-adicional', name: 'Tequeños', price: 5 },
+  { id: 'entrada-adicional-ceviche', categoryId: 'entrada-adicional', name: 'Ceviche', price: 5 },
+  { id: 'entrada-adicional-alitas-bbq', categoryId: 'entrada-adicional', name: 'Alitas BBQ', price: 5 },
+  { id: 'entrada-adicional-ensalada-palta', categoryId: 'entrada-adicional', name: 'Ensalada de palta', price: 5 },
+  { id: 'guarnicion-arroz', categoryId: 'guarnicion', name: 'Porción de arroz', price: 5 },
+  { id: 'guarnicion-platano', categoryId: 'guarnicion', name: 'Porción de plátano', price: 5 },
+  { id: 'guarnicion-bistec', categoryId: 'guarnicion', name: 'Bistec', price: 5 },
+  { id: 'guarnicion-papa', categoryId: 'guarnicion', name: 'Porción de papa', price: 5 },
+  { id: 'guarnicion-menestra', categoryId: 'guarnicion', name: 'Porción de menestra', price: 5 },
+  { id: 'guarnicion-presa-adicional', categoryId: 'guarnicion', name: 'Presa adicional', price: 5 },
+  { id: 'guarnicion-huevo-frito', categoryId: 'guarnicion', name: 'Huevo frito', price: 2 },
+  { id: 'guarnicion-papas-fritas', categoryId: 'guarnicion', name: 'Porción de papas fritas', price: 5 },
+  { id: 'guarnicion-sopa-dieta', categoryId: 'guarnicion', name: 'Sopa de dieta', price: 15 },
+];
+
 // Los precios de platos se transcribieron de las capturas proporcionadas. Los de bebidas son sugeridos.
 const MENU_ENTRIES: Product[] = [
   { id: 'arroz-mariscos', categoryId: 'marinos', name: 'Arroz con mariscos', price: 20, featured: true },
@@ -81,9 +105,9 @@ const MENU_ENTRIES: Product[] = [
 ];
 
 // Cada ficha tiene su propia fotografía: la categoría distingue incluso los platos repetidos.
-export const PRODUCTS: Product[] = MENU_ENTRIES.map(product => ({
+export const PRODUCTS: Product[] = [...MENU_ENTRIES.map(product => ({
   ...product,
   id: `${product.categoryId}-${product.id}`,
   image: `images/menu/${product.categoryId}-${product.id}.webp`,
   imageAlt: product.name,
-}));
+})), ...DAILY_ADDONS];

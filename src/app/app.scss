@@ -202,6 +202,9 @@ main { background: linear-gradient(180deg, #edf9f5 0%, #eef8e8 38%, #f4faef 100%
 .daily-review { min-height: 41px; display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 15px; padding: 0 13px; border: 1px solid var(--leaf); border-radius: 7px; color: var(--leaf-dark); background: #fff; font-size: .76rem; font-weight: 800; cursor: pointer; }
 .daily-review:hover { background: var(--leaf-pale); }
 .daily-unavailable { padding: 34px 24px; border: 1px solid var(--line); border-radius: 12px; color: var(--muted); background: #fff; text-align: center; font-size: .9rem; }
+.daily-addon-section { margin-top: 32px; }
+.daily-addon-section .category-title h3 { color: #246f96; }
+.daily-addon-grid { gap: 14px; }
 @media (max-width: 1000px) { .daily-options { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 760px) { .daily-options { grid-template-columns: 1fr; } }
 @media (max-width: 600px) { .menu-section-picker { gap: 8px; padding: 9px; border-radius: 16px; }.menu-section-picker button { min-height: 91px; gap: 7px; padding: 11px 12px; border-radius: 11px; }.picker-icon { width: 30px; height: 30px; border-radius: 8px; }.picker-icon svg { width: 21px; height: 21px; }.picker-label { font-size: clamp(.97rem, 4vw, 1.22rem); }.picker-arrow { width: 25px; height: 25px; }.daily-search { height: 43px; margin-top: 0; }.daily-added { padding: 16px; }.daily-added-item { padding: 10px; } }

@@ -83,6 +83,8 @@
                 <button type="button" [class.active]="filter() === 'carta'" [attr.aria-pressed]="filter() === 'carta'" (click)="selectFilter('carta')">A la carta</button>
                 <button type="button" [class.active]="filter() === 'fondo'" [attr.aria-pressed]="filter() === 'fondo'" (click)="selectFilter('fondo')">Fondos del día</button>
                 <button type="button" [class.active]="filter() === 'entrada'" [attr.aria-pressed]="filter() === 'entrada'" (click)="selectFilter('entrada')">Entradas</button>
+                <button type="button" [class.active]="filter() === 'entrada-adicional'" [attr.aria-pressed]="filter() === 'entrada-adicional'" (click)="selectFilter('entrada-adicional')">Entradas adicionales</button>
+                <button type="button" [class.active]="filter() === 'guarnicion'" [attr.aria-pressed]="filter() === 'guarnicion'" (click)="selectFilter('guarnicion')">Guarniciones</button>
               </nav>
               <button class="create-button" type="button" [disabled]="!authenticated() || busy()" (click)="create()"><span aria-hidden="true">+</span> {{ filter() === 'entrada' ? 'Agregar entrada' : 'Agregar plato' }}</button>
               <label class="search-box"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.5"/><path d="m16 16 5 5"/></svg><span class="visually-hidden">Buscar platos</span><input type="search" placeholder="Buscar un plato…" [ngModel]="search()" (ngModelChange)="search.set($event)"></label>

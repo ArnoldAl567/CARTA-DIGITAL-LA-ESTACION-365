@@ -1,13 +1,13 @@
 import { Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ADMIN_LOGIN } from '../../config/admin-login.config';
-import { CATEGORIES } from '../../data/menu.data';
+import { CATEGORIES, DAILY_ADDON_CATEGORIES } from '../../data/menu.data';
 import { INITIAL_CATALOG } from '../../data/catalog-seed';
 import { CatalogItem, CatalogKind, DailyPrices, DEFAULT_DAILY_PRICES } from '../../models/catalog.models';
 import { CatalogApiService } from '../../services/catalog-api.service';
 import { MenuService } from '../../services/menu.service';
 
-type CatalogFilter = 'todos' | CatalogKind;
+type CatalogFilter = 'todos' | CatalogKind | 'entrada-adicional' | 'guarnicion';
 
 @Component({
   selector: 'app-admin-panel',
@@ -32,15 +32,17 @@ export class AdminPanel implements OnInit, OnDestroy {
     const kind = this.filter();
     const term = this.search().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
     return this.rows().filter(row => {
-      const matchesKind = kind === 'todos' || row.kind === kind;
+      const matchesKind = kind === 'todos' ? true :
+        kind === 'carta' ? row.kind === 'carta' && !DAILY_ADDON_CATEGORIES.some(category => category.id === row.category_id) :
+        kind === 'entrada-adicional' || kind === 'guarnicion' ? row.category_id === kind : row.kind === kind;
       const name = row.name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
       return matchesKind && (!term || name.includes(term));
     });
   });
   readonly activeCount = computed(() => this.rows().filter(row => row.active).length);
   readonly inactiveCount = computed(() => this.rows().length - this.activeCount());
-  readonly categoryNames = new Map(CATEGORIES.map(category => [category.id, category.shortName]));
-  readonly categories = CATEGORIES;
+  readonly categoryNames = new Map([...CATEGORIES, ...DAILY_ADDON_CATEGORIES].map(category => [category.id, category.shortName]));
+  readonly categories = [...CATEGORIES, ...DAILY_ADDON_CATEGORIES];
   readonly prices = signal<DailyPrices>(DEFAULT_DAILY_PRICES);
   priceForm: DailyPrices = { ...DEFAULT_DAILY_PRICES };
   username = '';
@@ -157,7 +159,7 @@ export class AdminPanel implements OnInit, OnDestroy {
   create(): void {
     if (!this.authenticated() || this.busy()) return;
     const selectedFilter = this.filter();
-    const kind: CatalogKind = selectedFilter === 'todos' ? 'carta' : selectedFilter;
+    const kind: CatalogKind = selectedFilter === 'todos' || selectedFilter === 'entrada-adicional' || selectedFilter === 'guarnicion' ? 'carta' : selectedFilter;
     const sourceId = `nuevo-${crypto.randomUUID()}`;
     const lastOrder = Math.max(-1, ...this.rows().filter(row => row.kind === kind).map(row => row.sort_order));
     this.releasePreview();
@@ -165,7 +167,7 @@ export class AdminPanel implements OnInit, OnDestroy {
       item_key: `${kind}:${sourceId}`,
       kind,
       source_id: sourceId,
-      category_id: kind === 'carta' ? this.categories[0].id : null,
+      category_id: kind === 'carta' ? (selectedFilter === 'entrada-adicional' || selectedFilter === 'guarnicion' ? selectedFilter : this.categories[0].id) : null,
       name: '',
       price: null,
       image_url: null,

@@ -35,6 +35,26 @@ describe('App', () => {
     expect(compiled.textContent).not.toContain('Imagen referencial');
   });
 
+  it('adds daily menu extras with their individual prices', async () => {
+    const fixture = TestBed.createComponent(App);
+    await fixture.whenStable();
+    fixture.componentInstance.cart.clear();
+    fixture.detectChanges();
+    const page = fixture.nativeElement as HTMLElement;
+    const sections = page.querySelectorAll<HTMLElement>('.daily-addon-section');
+    expect(sections.length).toBe(2);
+    expect(sections[0].querySelector('h3')?.textContent).toContain('Entradas adicionales');
+    expect(sections[0].querySelectorAll('app-product-card').length).toBe(7);
+    expect(sections[1].querySelector('h3')?.textContent).toContain('Guarniciones');
+    expect(sections[1].querySelectorAll('app-product-card').length).toBe(9);
+    const egg = Array.from(sections[1].querySelectorAll<HTMLElement>('app-product-card'))
+      .find(card => card.textContent?.includes('Huevo frito'))!;
+    egg.querySelector<HTMLButtonElement>('.add-button')?.click();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.cart.items().find(item => item.product.name === 'Huevo frito')?.product.price).toBe(2);
+    expect(fixture.componentInstance.cart.total()).toBe(2);
+  });
+
   it('adds the same main twice with a different starter for each serving', async () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();

@@ -184,6 +184,20 @@
           } @else {
             <div class="daily-unavailable">El menú del día no está disponible por ahora.</div>
           }
+          @for (section of dailyAddonSections(); track section.id) {
+            <section class="daily-addon-section" [attr.aria-labelledby]="'daily-addon-title-' + section.id">
+              <div class="category-heading daily-course-heading">
+                <span class="category-index">{{ section.id === 'entrada-adicional' ? '02' : '03' }}</span>
+                <div class="category-title"><h3 [id]="'daily-addon-title-' + section.id">{{ section.name }}</h3></div>
+                <span class="category-count">{{ section.products.length }} {{ section.products.length === 1 ? 'opción' : 'opciones' }}</span>
+              </div>
+              <div class="product-grid daily-addon-grid">
+                @for (product of section.products; track product.id) {
+                  <app-product-card [product]="product" [quantity]="quantities().get(product.id) ?? 0" (added)="addProduct($event)" (decreased)="cart.setQuantity($event.id, (quantities().get($event.id) ?? 0) - 1)" />
+                }
+              </div>
+            </section>
+          }
         </section>
       }
     </div>

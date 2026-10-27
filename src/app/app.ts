@@ -7,7 +7,7 @@ import { Hero } from './components/hero/hero';
 import { ProductCard } from './components/product-card/product-card';
 import { SiteHeader } from './components/site-header/site-header';
 import { dailyMenuProduct, DAILY_MENU_TYPES, DailyMenuType } from './data/daily-menu.data';
-import { BUSINESS_CONFIG } from './data/menu.data';
+import { BUSINESS_CONFIG, DAILY_ADDON_CATEGORIES } from './data/menu.data';
 import { CategoryId, Product } from './models/menu.models';
 import { CartService } from './services/cart.service';
 import { MenuService } from './services/menu.service';
@@ -69,6 +69,10 @@ export class App implements OnDestroy {
   private nextDailyDraftId = 1;
   readonly categories = computed(() => this.menu.categories().filter(category => category.active !== false));
   readonly products = this.menu.products;
+  readonly dailyAddonSections = computed(() => DAILY_ADDON_CATEGORIES.map(category => ({
+    ...category,
+    products: this.products().filter(product => product.categoryId === category.id && product.active !== false),
+  })).filter(category => category.products.length > 0));
   readonly activeCategory = signal<'all' | CategoryId>('all');
   readonly searchTerm = signal('');
   readonly cartOpen = signal(false);

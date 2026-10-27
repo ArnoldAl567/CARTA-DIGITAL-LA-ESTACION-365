@@ -64,6 +64,18 @@ describe('AdminPanel', () => {
     expect(new Set(api.createItem.calls.allArgs().map(([item]) => item.item_key)).size).toBe(3);
   });
 
+  it('keeps menu extras in their own administrative sections', () => {
+    const panel = fixture.componentInstance;
+    panel.selectFilter('carta');
+    expect(panel.filteredRows().length).toBe(47);
+    panel.selectFilter('entrada-adicional');
+    expect(panel.filteredRows().length).toBe(7);
+    panel.create();
+    expect(panel.editForm?.category_id).toBe('entrada-adicional');
+    panel.selectFilter('guarnicion');
+    expect(panel.filteredRows().length).toBe(9);
+  });
+
   it('uses the administrator username while Neon validates the password', async () => {
     api.restoreAdminSession.and.resolveTo(false);
     const loginFixture = TestBed.createComponent(AdminPanel);
