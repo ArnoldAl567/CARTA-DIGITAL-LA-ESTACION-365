@@ -35,19 +35,22 @@ describe('App', () => {
     expect(compiled.textContent).not.toContain('Imagen referencial');
   });
 
-  it('adds daily menu extras with their individual prices', async () => {
+  it('shows additional starters under the daily menu and sides under à la carte', async () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
     fixture.componentInstance.cart.clear();
     fixture.detectChanges();
     const page = fixture.nativeElement as HTMLElement;
     const sections = page.querySelectorAll<HTMLElement>('.daily-addon-section');
-    expect(sections.length).toBe(2);
+    expect(sections.length).toBe(1);
     expect(sections[0].querySelector('h3')?.textContent).toContain('Entradas adicionales');
     expect(sections[0].querySelectorAll('app-product-card').length).toBe(7);
-    expect(sections[1].querySelector('h3')?.textContent).toContain('Guarniciones');
-    expect(sections[1].querySelectorAll('app-product-card').length).toBe(9);
-    const egg = Array.from(sections[1].querySelectorAll<HTMLElement>('app-product-card'))
+    fixture.componentInstance.activeSection.set('carta');
+    fixture.detectChanges();
+    const sides = Array.from(page.querySelectorAll<HTMLElement>('.category-section'))
+      .find(section => section.querySelector('h3')?.textContent?.includes('Guarniciones'))!;
+    expect(sides.querySelectorAll('app-product-card').length).toBe(9);
+    const egg = Array.from(sides.querySelectorAll<HTMLElement>('app-product-card'))
       .find(card => card.textContent?.includes('Huevo frito'))!;
     egg.querySelector<HTMLButtonElement>('.add-button')?.click();
     fixture.detectChanges();

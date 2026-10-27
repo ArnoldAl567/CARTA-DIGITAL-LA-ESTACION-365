@@ -22,11 +22,11 @@ export const CATEGORIES: Category[] = [
   { id: 'mix', name: 'Mix', shortName: 'Mix', description: 'Cecina, chorizo y sabores amazónicos.' },
   { id: 'broaster', name: 'Broaster', shortName: 'Broaster', description: 'Pollo crocante con tus acompañamientos favoritos.' },
   { id: 'bebidas', name: 'Bebidas', shortName: 'Bebidas', description: 'El acompañamiento perfecto para tu plato.' },
+  { id: 'guarnicion', name: 'Guarniciones', shortName: 'Guarniciones', description: 'Acompaña tu plato como prefieras.' },
 ];
 
 export const DAILY_ADDON_CATEGORIES: Category[] = [
   { id: 'entrada-adicional', name: 'Entradas adicionales', shortName: 'Entradas adicionales', description: 'Para sumar a tu menú.' },
-  { id: 'guarnicion', name: 'Guarniciones', shortName: 'Guarniciones', description: 'Acompaña tu plato como prefieras.' },
 ];
 
 const DAILY_ADDONS: Product[] = [

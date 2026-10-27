@@ -67,7 +67,7 @@ describe('AdminPanel', () => {
   it('keeps menu extras in their own administrative sections', () => {
     const panel = fixture.componentInstance;
     panel.selectFilter('carta');
-    expect(panel.filteredRows().length).toBe(47);
+    expect(panel.filteredRows().length).toBe(56);
     panel.selectFilter('entrada-adicional');
     expect(panel.filteredRows().length).toBe(7);
     panel.create();
