@@ -110,4 +110,8 @@ export const PRODUCTS: Product[] = [...MENU_ENTRIES.map(product => ({
   id: `${product.categoryId}-${product.id}`,
   image: `images/menu/${product.categoryId}-${product.id}.webp`,
   imageAlt: product.name,
-})), ...DAILY_ADDONS];
+})), ...DAILY_ADDONS.map(product => ({
+  ...product,
+  image: `images/menu/${product.id}.webp`,
+  imageAlt: product.name,
+}))];
