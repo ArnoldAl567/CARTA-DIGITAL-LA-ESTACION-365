@@ -5,7 +5,6 @@ import { CATEGORIES, DAILY_ADDON_CATEGORIES } from '../../data/menu.data';
 import { INITIAL_CATALOG } from '../../data/catalog-seed';
 import { CatalogItem, CatalogKind, DailyPrices, DEFAULT_DAILY_PRICES } from '../../models/catalog.models';
 import { CatalogApiService } from '../../services/catalog-api.service';
-import { MenuService } from '../../services/menu.service';
 
 type CatalogFilter = 'todos' | CatalogKind | 'entrada-adicional' | 'guarnicion';
 
@@ -17,7 +16,6 @@ type CatalogFilter = 'todos' | CatalogKind | 'entrada-adicional' | 'guarnicion';
 })
 export class AdminPanel implements OnInit, OnDestroy {
   private readonly api = inject(CatalogApiService);
-  private readonly menu = inject(MenuService);
   readonly configured = this.api.configured;
   readonly loading = signal(this.configured);
   readonly authenticated = signal(false);
@@ -59,10 +57,16 @@ export class AdminPanel implements OnInit, OnDestroy {
 
   async ngOnInit(): Promise<void> {
     if (!this.configured) return;
-    const authorized = await this.api.restoreAdminSession();
-    this.authenticated.set(authorized);
-    if (authorized) await this.loadCatalog();
-    this.loading.set(false);
+    try {
+      const authorized = await this.api.restoreAdminSession();
+      this.authenticated.set(authorized);
+      if (authorized) await this.loadCatalog();
+    } catch (error) {
+      this.authenticated.set(false);
+      this.error.set(this.message(error));
+    } finally {
+      this.loading.set(false);
+    }
   }
 
   ngOnDestroy(): void { this.releasePreview(); }
@@ -125,16 +129,20 @@ export class AdminPanel implements OnInit, OnDestroy {
 
   private async loadCatalog(): Promise<void> {
     try {
-      let items = await this.api.loadItems(true);
+      let [items, prices] = await Promise.all([
+        this.api.loadItems(true),
+        this.api.loadDailyPrices(),
+      ]);
       if (!items.length) {
         await this.api.seedItems(INITIAL_CATALOG);
-        items = await this.api.loadItems(true);
+        [items, prices] = await Promise.all([
+          this.api.loadItems(true),
+          this.api.loadDailyPrices(),
+        ]);
       }
       this.rows.set(items);
-      const prices = await this.api.loadDailyPrices();
       this.prices.set(prices);
       this.priceForm = { ...prices };
-      await this.menu.refresh();
       this.error.set('');
     } catch (error) { this.error.set(this.message(error)); }
   }
@@ -247,7 +255,6 @@ export class AdminPanel implements OnInit, OnDestroy {
       this.rows.update(rows => creating
         ? [...rows, saved].sort((a, b) => a.sort_order - b.sort_order)
         : rows.map(row => row.item_key === saved.item_key ? saved : row));
-      await this.menu.refresh();
       this.closeEditor();
       this.notice.set(creating ? 'Plato agregado y visible en la carta digital.' : 'Cambios guardados y visibles en la carta digital.');
     } catch (error) { this.error.set(this.message(error)); }
@@ -262,7 +269,6 @@ export class AdminPanel implements OnInit, OnDestroy {
       const saved = await this.api.updateItem({ ...row, active: !row.active });
       this.rows.update(rows => rows.map(current => current.item_key === saved.item_key ? saved : current));
       if (this.editForm?.item_key === saved.item_key) this.editForm = { ...saved };
-      await this.menu.refresh();
       this.notice.set(`${saved.name}: ${saved.active ? 'disponible' : 'agotado'}.`);
     } catch (error) { this.error.set(this.message(error)); }
     finally { this.busy.set(false); }
@@ -279,7 +285,6 @@ export class AdminPanel implements OnInit, OnDestroy {
     try {
       await this.api.updateDailyPrices(prices);
       this.prices.set(prices);
-      await this.menu.refresh();
       this.notice.set('Precios del menú del día actualizados.');
     } catch (error) { this.error.set(this.message(error)); }
     finally { this.busy.set(false); }

@@ -6,6 +6,7 @@ interface PriceRow { setting_key: string; amount: number; }
 interface TokenResponse { token: string; }
 const MAX_FILE_BYTES = 5 * 1024 * 1024;
 const MAX_STORED_BYTES = 180 * 1024;
+const REQUEST_TIMEOUT_MS = 12_000;
 const DATA_IMAGE = /^data:image\/webp;base64,[A-Za-z0-9+/=]+$/;
 
 @Injectable({ providedIn: 'root' })
@@ -23,6 +24,22 @@ export class CatalogApiService {
 
   private dataUrl(path: string): string {
     return `${NEON_CONFIG.dataApiUrl.replace(/\/$/, '')}${path}`;
+  }
+
+  /** Evita que una red lenta deje el panel en un estado de carga indefinido. */
+  private async request(input: RequestInfo | URL, init: RequestInit = {}): Promise<Response> {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+    try {
+      return await fetch(input, { ...init, signal: controller.signal });
+    } catch (error) {
+      if (controller.signal.aborted) {
+        throw new Error('La conexión tardó demasiado. Revisa tu internet e inténtalo de nuevo.');
+      }
+      throw error;
+    } finally {
+      clearTimeout(timeout);
+    }
   }
 
   private async parse<T>(response: Response): Promise<T> {
@@ -43,7 +60,7 @@ export class CatalogApiService {
 
   private async anonymousJwt(): Promise<string> {
     if (this.anonymousToken && this.anonymousExpiresAt > Date.now() + 30_000) return this.anonymousToken;
-    const response = await fetch(this.authUrl('/token/anonymous'), { cache: 'no-store' });
+    const response = await this.request(this.authUrl('/token/anonymous'), { cache: 'no-store' });
     const data = await this.parse<TokenResponse>(response);
     if (!data.token) throw new Error('Neon no entregó el acceso público a la carta.');
     this.anonymousToken = data.token;
@@ -55,7 +72,7 @@ export class CatalogApiService {
     if (this.adminToken && this.tokenExpiresAt > Date.now() + 30_000) return this.adminToken;
     if (!this.tokenPromise) {
       this.tokenPromise = (async () => {
-        const response = await fetch(this.authUrl('/token'), {
+        const response = await this.request(this.authUrl('/token'), {
           credentials: 'include',
           cache: 'no-store',
         });
@@ -77,7 +94,7 @@ export class CatalogApiService {
 
   async signIn(email: string, password: string): Promise<void> {
     if (!this.configured) throw new Error('Falta conectar el proyecto de Neon.');
-    const response = await fetch(this.authUrl('/sign-in/email'), {
+    const response = await this.request(this.authUrl('/sign-in/email'), {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
@@ -95,7 +112,7 @@ export class CatalogApiService {
 
   async requestPasswordReset(email: string): Promise<void> {
     if (!this.configured) throw new Error('Falta conectar el proyecto de Neon.');
-    const response = await fetch(this.authUrl('/request-password-reset'), {
+    const response = await this.request(this.authUrl('/request-password-reset'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, redirectTo: `${window.location.origin}/panel-administrativo` }),
@@ -105,7 +122,7 @@ export class CatalogApiService {
 
   async resetPassword(token: string, newPassword: string): Promise<void> {
     if (!this.configured) throw new Error('Falta conectar el proyecto de Neon.');
-    const response = await fetch(this.authUrl('/reset-password'), {
+    const response = await this.request(this.authUrl('/reset-password'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token, newPassword }),
@@ -116,11 +133,17 @@ export class CatalogApiService {
   async restoreAdminSession(): Promise<boolean> {
     if (!this.configured) return false;
     try { return await this.isAdmin(); }
-    catch { this.adminToken = ''; return false; }
+    catch (error) {
+      this.adminToken = '';
+      this.tokenExpiresAt = 0;
+      // Un usuario sin sesión debe ver el inicio de sesión; un fallo de red debe ser visible.
+      if (error instanceof TypeError || (error instanceof Error && error.message.includes('tardó demasiado'))) throw error;
+      return false;
+    }
   }
 
   private async isAdmin(): Promise<boolean> {
-    const response = await fetch(this.dataUrl('/catalog_admins?select=user_id&limit=1'), {
+    const response = await this.request(this.dataUrl('/catalog_admins?select=user_id&limit=1'), {
       headers: await this.headers(true),
       cache: 'no-store',
     });
@@ -131,7 +154,7 @@ export class CatalogApiService {
   async signOut(): Promise<void> {
     if (this.configured) {
       try {
-        await fetch(this.authUrl('/sign-out'), {
+        await this.request(this.authUrl('/sign-out'), {
           method: 'POST', credentials: 'include',
           headers: { 'Content-Type': 'application/json' }, body: '{}',
         });
@@ -142,7 +165,7 @@ export class CatalogApiService {
   }
 
   async loadItems(authenticated = false): Promise<CatalogItem[]> {
-    const response = await fetch(this.dataUrl('/catalog_items?select=*&order=sort_order.asc'), {
+    const response = await this.request(this.dataUrl('/catalog_items?select=*&order=sort_order.asc'), {
       headers: await this.headers(authenticated),
       cache: 'no-store',
     });
@@ -150,7 +173,7 @@ export class CatalogApiService {
   }
 
   async loadDailyPrices(): Promise<DailyPrices> {
-    const response = await fetch(this.dataUrl('/catalog_settings?select=setting_key,amount'), {
+    const response = await this.request(this.dataUrl('/catalog_settings?select=setting_key,amount'), {
       headers: await this.headers(false),
       cache: 'no-store',
     });
@@ -167,7 +190,7 @@ export class CatalogApiService {
   }
 
   async seedItems(items: CatalogItem[]): Promise<void> {
-    const response = await fetch(this.dataUrl('/catalog_items'), {
+    const response = await this.request(this.dataUrl('/catalog_items'), {
       method: 'POST',
       headers: await this.headers(true, {
         'Content-Type': 'application/json',
@@ -179,7 +202,7 @@ export class CatalogApiService {
   }
 
   async createItem(item: CatalogItem): Promise<CatalogItem> {
-    const response = await fetch(this.dataUrl('/catalog_items?select=*'), {
+    const response = await this.request(this.dataUrl('/catalog_items?select=*'), {
       method: 'POST',
       headers: await this.headers(true, { 'Content-Type': 'application/json', Prefer: 'return=representation' }),
       body: JSON.stringify(item),
@@ -191,7 +214,7 @@ export class CatalogApiService {
 
   async updateItem(item: CatalogItem): Promise<CatalogItem> {
     const query = new URLSearchParams({ item_key: `eq.${item.item_key}`, select: '*' });
-    const response = await fetch(this.dataUrl(`/catalog_items?${query}`), {
+    const response = await this.request(this.dataUrl(`/catalog_items?${query}`), {
       method: 'PATCH',
       headers: await this.headers(true, { 'Content-Type': 'application/json', Prefer: 'return=representation' }),
       body: JSON.stringify({ category_id: item.category_id, name: item.name, price: item.price, image_url: item.image_url, active: item.active }),
@@ -207,7 +230,7 @@ export class CatalogApiService {
       daily_ejecutivo_price: prices.ejecutivo,
     })) {
       const query = new URLSearchParams({ setting_key: `eq.${setting_key}` });
-      const response = await fetch(this.dataUrl(`/catalog_settings?${query}`), {
+      const response = await this.request(this.dataUrl(`/catalog_settings?${query}`), {
         method: 'PATCH',
         headers: await this.headers(true, { 'Content-Type': 'application/json', Prefer: 'return=minimal' }),
         body: JSON.stringify({ amount }),
