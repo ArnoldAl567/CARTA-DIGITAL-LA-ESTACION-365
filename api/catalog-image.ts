@@ -1,7 +1,7 @@
 import { put } from '@vercel/blob';
 import { randomUUID } from 'node:crypto';
 import type { IncomingMessage, ServerResponse } from 'node:http';
-import { NEON_CONFIG } from '../src/app/config/neon.config';
+import { NEON_CONFIG } from '../src/app/config/neon.config.js';
 
 const MAX_IMAGE_BYTES = 1024 * 1024;
 
