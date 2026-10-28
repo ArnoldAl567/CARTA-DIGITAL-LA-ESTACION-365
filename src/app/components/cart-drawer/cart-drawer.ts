@@ -81,7 +81,7 @@ export class CartDrawer implements OnChanges, OnDestroy {
   currentTime(): Date { return new Date(); }
 
   sendOrder(): void {
-    if (!isBusinessOpen(this.currentTime())) { this.errorMessage.set('Restaurante cerrado. Los pedidos se habilitan a las 11:00 a. m.'); return; }
+    if (!isBusinessOpen(this.currentTime())) { this.errorMessage.set('Restaurante cerrado. Los pedidos se habilitan a las 9:00 a. m.'); return; }
     if (!this.orderEnabled()) { this.errorMessage.set('La carta aún no está actualizada. Inténtalo nuevamente en un momento.'); return; }
     this.submitted.set(true);
     this.errorMessage.set('');

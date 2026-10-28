@@ -27,7 +27,7 @@
       </div>
 
       @if (!businessOpen()) {
-        <div class="closed-notice" role="status"><span class="closed-notice-dot" aria-hidden="true"></span><strong>Restaurante cerrado</strong><span>Los pedidos se habilitan a las 11:00 a. m.</span></div>
+        <div class="closed-notice" role="status"><span class="closed-notice-dot" aria-hidden="true"></span><strong>Restaurante cerrado</strong><span>Los pedidos se habilitan a las 9:00 a. m.</span></div>
       }
 
       @if (activeSection() === 'carta') {
@@ -229,8 +229,7 @@
               <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
             </span>
             <h2 id="footer-hours-title">Horario de atención</h2>
-            <div class="footer-hours"><span>Lunes a sábado</span><strong>{{ config.mondaySaturdayHours }}</strong></div>
-            <div class="footer-hours"><span>Domingo</span><strong>{{ config.sundayHours }}</strong></div>
+            <div class="footer-hours"><span>Lunes a domingo</span><strong>{{ config.dailyHours }}</strong></div>
           </section>
 
           <section class="footer-info-card footer-whatsapp" aria-labelledby="footer-whatsapp-title">

@@ -108,7 +108,7 @@ describe('CartDrawer WhatsApp order', () => {
 
   it('does not open WhatsApp outside business hours', () => {
     const open = spyOn(window, 'open');
-    const drawer = createDrawer(undefined, new Date('2026-10-26T15:59:00Z'));
+    const drawer = createDrawer(undefined, new Date('2026-10-26T13:59:00Z'));
     drawer.sendOrder();
     expect(open).not.toHaveBeenCalled();
     expect(drawer.errorMessage()).toContain('Restaurante cerrado');

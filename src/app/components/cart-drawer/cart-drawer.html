@@ -86,7 +86,7 @@
         }
         <div class="total-row"><span>Total del pedido</span><strong>{{ orderTotal() | currency:'PEN':'symbol-narrow':'1.2-2':'es-PE' }}</strong></div>
         @if (errorMessage()) { <p class="form-error" role="alert">{{ errorMessage() }}</p> }
-        @if (!businessOpen()) { <p class="closed-order-note" role="status">Restaurante cerrado. Los pedidos se habilitan a las 11:00 a. m.</p> }
+        @if (!businessOpen()) { <p class="closed-order-note" role="status">Restaurante cerrado. Los pedidos se habilitan a las 9:00 a. m.</p> }
         <button class="whatsapp" type="button" [disabled]="!orderEnabled() || !businessOpen()" (click)="sendOrder()">{{ businessOpen() ? 'Enviar pedido por WhatsApp' : 'Restaurante cerrado' }} <span aria-hidden="true">↗</span></button>
         @if (businessOpen()) { <p class="send-note">Revisa el mensaje y pulsa enviar en WhatsApp.</p> }
       </footer>

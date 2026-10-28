@@ -11,8 +11,7 @@ export const BUSINESS_CONFIG = {
   addressLine1: 'Los Pinos 461',
   addressLine2: 'San Miguel 15086',
   mapsUrl: 'https://www.google.com/maps/search/?api=1&query=Los+Pinos+461%2C+San+Miguel+15086',
-  mondaySaturdayHours: '11:00 a. m. – 11:00 p. m.',
-  sundayHours: '11:00 a. m. – 6:00 p. m.',
+  dailyHours: '9:00 a. m. – 11:00 p. m.',
 };
 
 export const CATEGORIES: Category[] = [
