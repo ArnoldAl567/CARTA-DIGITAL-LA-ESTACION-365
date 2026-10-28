@@ -39,6 +39,8 @@ export class AdminPanel implements OnInit, OnDestroy {
   });
   readonly activeCount = computed(() => this.rows().filter(row => row.active).length);
   readonly inactiveCount = computed(() => this.rows().length - this.activeCount());
+  readonly embeddedImageCount = computed(() => this.rows().filter(row => row.image_url?.startsWith('data:image/webp;base64,')).length);
+  readonly migrationStatus = signal('');
   readonly categoryNames = new Map([...CATEGORIES, ...DAILY_ADDON_CATEGORIES].map(category => [category.id, category.shortName]));
   readonly categories = [...CATEGORIES, ...DAILY_ADDON_CATEGORIES];
   readonly prices = signal<DailyPrices>(DEFAULT_DAILY_PRICES);
@@ -259,6 +261,31 @@ export class AdminPanel implements OnInit, OnDestroy {
       this.notice.set(creating ? 'Plato agregado y visible en la carta digital.' : 'Cambios guardados y visibles en la carta digital.');
     } catch (error) { this.error.set(this.message(error)); }
     finally { this.busy.set(false); }
+  }
+
+  async migrateEmbeddedImages(): Promise<void> {
+    if (!this.authenticated() || this.busy()) return;
+    const pending = this.rows().filter(row => row.image_url?.startsWith('data:image/webp;base64,'));
+    if (!pending.length) return;
+    this.busy.set(true);
+    this.error.set('');
+    this.notice.set('');
+    let completed = 0;
+    try {
+      for (const row of pending) {
+        this.migrationStatus.set(`Moviendo fotografías ${completed + 1} de ${pending.length}…`);
+        const imageUrl = await this.api.uploadEmbeddedImage(row.image_url!);
+        const saved = await this.api.updateItem({ ...row, image_url: imageUrl });
+        this.rows.update(rows => rows.map(current => current.item_key === saved.item_key ? saved : current));
+        completed++;
+      }
+      this.notice.set(`${completed} fotografías movidas al almacenamiento de imágenes.`);
+    } catch (error) {
+      this.error.set(`Se movieron ${completed} de ${pending.length} fotografías. ${this.message(error)} Puedes reanudar la migración.`);
+    } finally {
+      this.migrationStatus.set('');
+      this.busy.set(false);
+    }
   }
 
   async toggleAvailability(row: CatalogItem): Promise<void> {

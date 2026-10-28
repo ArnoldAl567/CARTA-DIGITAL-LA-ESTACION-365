@@ -68,6 +68,12 @@
         }
         @if (error()) { <p class="message error" role="alert">{{ error() }}</p> }
         @if (notice()) { <p class="message success" role="status">{{ notice() }}</p> }
+        @if (embeddedImageCount() > 0) {
+          <section class="image-migration" aria-label="Optimizar fotografías del catálogo">
+            <div><strong>Optimizar fotografías</strong><p>{{ embeddedImageCount() }} fotos siguen guardadas en Neon. Muévelas al almacenamiento de imágenes para acelerar la carta y reducir el consumo de datos.</p></div>
+            <button type="button" class="create-button" [disabled]="busy()" (click)="migrateEmbeddedImages()">{{ migrationStatus() || 'Mover fotografías' }}</button>
+          </section>
+        }
 
         <div class="stats-grid" aria-label="Resumen de la carta">
           <div class="stat-card"><span>Total de productos</span><strong>{{ rows().length }}</strong><small>Platos y entradas</small></div>

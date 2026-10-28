@@ -1,0 +1,7 @@
+{
+  "/api": {
+    "target": "https://laestacion365.com",
+    "secure": true,
+    "changeOrigin": true
+  }
+}

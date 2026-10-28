@@ -17,12 +17,18 @@ export class MenuService {
   readonly syncError = signal('');
   readonly ready = signal(!catalogConfigured);
   private refreshing = false;
+  private lastRefreshAt = 0;
+  private readonly refreshIntervalMs = 5 * 60_000;
 
   constructor() {
     if (!catalogConfigured) return;
     void this.refresh();
-    window.setInterval(() => { if (!document.hidden) void this.refresh(); }, 30_000);
-    document.addEventListener('visibilitychange', () => { if (!document.hidden) void this.refresh(); });
+    window.setInterval(() => {
+      if (!document.hidden && Date.now() - this.lastRefreshAt >= this.refreshIntervalMs) void this.refresh();
+    }, this.refreshIntervalMs);
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && Date.now() - this.lastRefreshAt >= this.refreshIntervalMs) void this.refresh();
+    });
   }
 
   async refresh(): Promise<void> {
@@ -42,9 +48,9 @@ export class MenuService {
       this.dailyStarters.set(catalog.dailyStarters);
       this.syncError.set('');
       this.ready.set(true);
+      this.lastRefreshAt = Date.now();
     } catch {
       this.syncError.set('No se pudo actualizar la carta. Comprueba tu conexión e inténtalo de nuevo.');
-      this.ready.set(false);
     } finally {
       this.refreshing = false;
     }

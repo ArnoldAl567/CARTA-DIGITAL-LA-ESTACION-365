@@ -12,13 +12,15 @@ describe('AdminPanel', () => {
 
   beforeEach(async () => {
     api = Object.assign(jasmine.createSpyObj<CatalogApiService>('CatalogApiService', [
-      'restoreAdminSession', 'loadItems', 'loadDailyPrices', 'createItem', 'uploadImage', 'signIn', 'requestPasswordReset',
+      'restoreAdminSession', 'loadItems', 'loadDailyPrices', 'createItem', 'updateItem', 'uploadImage', 'uploadEmbeddedImage', 'signIn', 'requestPasswordReset',
     ]), { configured: true });
     api.restoreAdminSession.and.resolveTo(true);
     api.loadItems.and.resolveTo(INITIAL_CATALOG);
     api.loadDailyPrices.and.resolveTo(DEFAULT_DAILY_PRICES);
     api.createItem.and.callFake(async item => item);
     api.uploadImage.and.resolveTo('https://example.com/plato.webp');
+    api.uploadEmbeddedImage.and.resolveTo('https://example.com/migrado.webp');
+    api.updateItem.and.callFake(async item => item);
     api.signIn.and.resolveTo();
     api.requestPasswordReset.and.resolveTo();
     await TestBed.configureTestingModule({
@@ -114,5 +116,17 @@ describe('AdminPanel', () => {
     loginFixture.detectChanges();
     expect(input.type).toBe('password');
     expect(api.signIn).not.toHaveBeenCalled();
+  });
+
+  it('moves embedded images one row at a time and retains the catalog data', async () => {
+    const panel = fixture.componentInstance;
+    const original: CatalogItem = { ...INITIAL_CATALOG[0], image_url: 'data:image/webp;base64,UklGRg==' };
+    panel.rows.set([original]);
+    expect(panel.embeddedImageCount()).toBe(1);
+    await panel.migrateEmbeddedImages();
+    expect(api.uploadEmbeddedImage).toHaveBeenCalledWith(original.image_url!);
+    expect(api.updateItem).toHaveBeenCalledWith({ ...original, image_url: 'https://example.com/migrado.webp' });
+    expect(panel.rows()[0].image_url).toBe('https://example.com/migrado.webp');
+    expect(panel.embeddedImageCount()).toBe(0);
   });
 });

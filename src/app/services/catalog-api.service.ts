@@ -27,9 +27,9 @@ export class CatalogApiService {
   }
 
   /** Evita que una red lenta deje el panel en un estado de carga indefinido. */
-  private async request(input: RequestInfo | URL, init: RequestInit = {}): Promise<Response> {
+  private async request(input: RequestInfo | URL, init: RequestInit = {}, timeoutMs = REQUEST_TIMEOUT_MS): Promise<Response> {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
     try {
       return await fetch(input, { ...init, signal: controller.signal });
     } catch (error) {
@@ -165,7 +165,12 @@ export class CatalogApiService {
   }
 
   async loadItems(authenticated = false): Promise<CatalogItem[]> {
-    const response = await this.request(this.dataUrl('/catalog_items?select=*&order=sort_order.asc'), {
+    const query = new URLSearchParams({
+      select: 'item_key,kind,source_id,category_id,name,price,image_url,active,sort_order',
+      order: 'sort_order.asc',
+    });
+    if (!authenticated) query.set('active', 'eq.true');
+    const response = await this.request(this.dataUrl(`/catalog_items?${query}`), {
       headers: await this.headers(authenticated),
       cache: 'no-store',
     });
@@ -239,6 +244,25 @@ export class CatalogApiService {
     }
   }
 
+  private async uploadBlob(blob: Blob): Promise<string> {
+    const response = await this.request('/api/catalog-image', {
+      method: 'POST',
+      headers: { ...await this.headers(true), 'Content-Type': 'image/webp' },
+      body: blob,
+      cache: 'no-store',
+    }, 30_000);
+    const result = await this.parse<{ url: string }>(response);
+    if (!/^https:\/\//i.test(result.url)) throw new Error('El almacenamiento no devolvió una URL válida.');
+    return result.url;
+  }
+
+  async uploadEmbeddedImage(image: string): Promise<string> {
+    if (!DATA_IMAGE.test(image)) throw new Error('La fotografía guardada no tiene un formato válido.');
+    const blob = await (await fetch(image)).blob();
+    if (blob.size > MAX_FILE_BYTES) throw new Error('La fotografía guardada supera el límite de tamaño.');
+    return this.uploadBlob(blob);
+  }
+
   async uploadImage(file: File): Promise<string> {
     if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) throw new Error('Sube una imagen JPG, PNG o WebP.');
     if (file.size > MAX_FILE_BYTES) throw new Error('La imagen no debe superar 5 MB.');
@@ -254,13 +278,7 @@ export class CatalogApiService {
           const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/webp', quality));
           if (!blob || blob.type !== 'image/webp') throw new Error('Este navegador no pudo preparar la fotografía.');
           if (blob.size > MAX_STORED_BYTES) continue;
-          const image = await new Promise<string>((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(String(reader.result));
-            reader.onerror = () => reject(new Error('No se pudo leer la fotografía.'));
-            reader.readAsDataURL(blob);
-          });
-          if (DATA_IMAGE.test(image)) return image;
+          return this.uploadBlob(blob);
         }
       }
       throw new Error('La fotografía tiene demasiado detalle. Prueba con otra imagen.');
