@@ -26,7 +26,7 @@ describe('App', () => {
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('h1')?.textContent).toContain('La Estación 365');
-    expect(compiled.querySelector('.hero-image')?.getAttribute('src')).toBe('/images/portada-estacion-365.png');
+    expect(compiled.querySelector('.hero-image')?.getAttribute('src')).toBe('/images/portada-estacion-365.webp');
     expect(compiled.textContent).toContain('Arroz con mariscos');
     const sectionButtons = compiled.querySelectorAll<HTMLButtonElement>('.menu-section-picker button');
     expect(sectionButtons[0].textContent).toContain('Menú del día');
