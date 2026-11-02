@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ADMIN_LOGIN } from '../../config/admin-login.config';
 import { INITIAL_CATALOG } from '../../data/catalog-seed';
-import { CatalogItem, CatalogKind, DEFAULT_DAILY_PRICES } from '../../models/catalog.models';
+import { CATALOG_LIMIT_MESSAGE, CatalogItem, CatalogKind, DEFAULT_DAILY_PRICES, MAX_CATALOG_ITEMS } from '../../models/catalog.models';
 import { CatalogApiService } from '../../services/catalog-api.service';
 import { MenuService } from '../../services/menu.service';
 import { AdminPanel } from './admin-panel';
@@ -9,6 +9,13 @@ import { AdminPanel } from './admin-panel';
 describe('AdminPanel', () => {
   let fixture: ComponentFixture<AdminPanel>;
   let api: jasmine.SpyObj<CatalogApiService> & { configured: boolean };
+
+  const catalogWith = (count: number): CatalogItem[] => Array.from({ length: count }, (_, index) => ({
+    ...INITIAL_CATALOG[index % INITIAL_CATALOG.length],
+    item_key: `limite:${index}`,
+    source_id: `limite-${index}`,
+    active: index % 2 === 0,
+  }));
 
   beforeEach(async () => {
     api = Object.assign(jasmine.createSpyObj<CatalogApiService>('CatalogApiService', [
@@ -76,6 +83,69 @@ describe('AdminPanel', () => {
     expect(panel.editForm?.category_id).toBe('entrada-adicional');
     panel.selectFilter('guarnicion');
     expect(panel.filteredRows().length).toBe(9);
+  });
+
+  it('allows the 150th product and then blocks additions across every section, including inactive items', async () => {
+    const panel = fixture.componentInstance;
+    panel.rows.set(catalogWith(MAX_CATALOG_ITEMS - 1));
+    panel.selectFilter('entrada');
+    panel.create();
+    panel.editForm!.name = 'Última entrada';
+    const photo = new File(['foto'], 'entrada.png', { type: 'image/png' });
+    panel.chooseImage({ target: { files: [photo], value: '' } } as unknown as Event);
+    await panel.saveItem();
+    expect(panel.rows().length).toBe(MAX_CATALOG_ITEMS);
+    for (const filter of ['carta', 'fondo', 'entrada', 'entrada-adicional', 'guarnicion'] as const) {
+      panel.selectFilter(filter);
+      fixture.detectChanges();
+      expect(fixture.nativeElement.querySelector('.catalog-toolbar .create-button').disabled).toBeTrue();
+      panel.create();
+      expect(panel.editForm).toBeNull();
+    }
+    expect(api.createItem).toHaveBeenCalledTimes(1);
+    expect(fixture.nativeElement.querySelector('.catalog-capacity').textContent).toContain('150 productos alcanzado');
+  });
+
+  it('does not upload a photo if the catalog reaches capacity while a new product is being edited', async () => {
+    const panel = fixture.componentInstance;
+    panel.rows.set(catalogWith(MAX_CATALOG_ITEMS - 1));
+    panel.create();
+    panel.editForm!.name = 'Plato pendiente';
+    panel.editForm!.price = 20;
+    panel.chooseImage({ target: { files: [new File(['foto'], 'plato.png', { type: 'image/png' })], value: '' } } as unknown as Event);
+    panel.rows.set(catalogWith(MAX_CATALOG_ITEMS));
+    await panel.saveItem();
+    expect(api.uploadImage).not.toHaveBeenCalled();
+    expect(api.createItem).not.toHaveBeenCalled();
+    expect(panel.error()).toContain('máximo de 150');
+  });
+
+  it('continues to allow edits and availability changes at full capacity', async () => {
+    const panel = fixture.componentInstance;
+    panel.rows.set(catalogWith(MAX_CATALOG_ITEMS));
+    const original = panel.rows()[0];
+    panel.edit(original);
+    panel.editForm!.name = 'Nombre actualizado';
+    await panel.saveItem();
+    expect(api.updateItem).toHaveBeenCalledWith(jasmine.objectContaining({ item_key: original.item_key, name: 'Nombre actualizado' }));
+    await panel.toggleAvailability(panel.rows()[0]);
+    expect(panel.rows()[0].active).toBeFalse();
+    expect(panel.rows().length).toBe(MAX_CATALOG_ITEMS);
+    expect(api.createItem).not.toHaveBeenCalled();
+  });
+
+  it('refreshes the count when another administrator takes the last available place', async () => {
+    const panel = fixture.componentInstance;
+    panel.rows.set(catalogWith(MAX_CATALOG_ITEMS - 1));
+    panel.create();
+    panel.editForm!.name = 'Plato pendiente';
+    panel.editForm!.price = 20;
+    panel.chooseImage({ target: { files: [new File(['foto'], 'plato.png', { type: 'image/png' })], value: '' } } as unknown as Event);
+    api.createItem.and.rejectWith(new Error(CATALOG_LIMIT_MESSAGE));
+    api.loadItems.and.resolveTo(catalogWith(MAX_CATALOG_ITEMS));
+    await panel.saveItem();
+    expect(panel.catalogLimitReached()).toBeTrue();
+    expect(panel.error()).toBe(CATALOG_LIMIT_MESSAGE);
   });
 
   it('uses the administrator username while Neon validates the password', async () => {

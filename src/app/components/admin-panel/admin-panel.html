@@ -76,10 +76,18 @@
         }
 
         <div class="stats-grid" aria-label="Resumen de la carta">
-          <div class="stat-card"><span>Total de productos</span><strong>{{ rows().length }}</strong><small>Platos y entradas</small></div>
+          <div class="stat-card"><span>Total de productos</span><strong>{{ rows().length }} / {{ catalogLimit }}</strong><small>Límite total de la carta</small></div>
           <div class="stat-card"><span>Disponibles</span><strong>{{ activeCount() }}</strong><small>Visibles para clientes</small></div>
           <div class="stat-card"><span>Agotados</span><strong>{{ inactiveCount() }}</strong><small>Ocultos de la carta</small></div>
         </div>
+
+        <p class="catalog-capacity" id="catalog-capacity" [class.is-full]="catalogLimitReached()" role="status">
+          @if (catalogLimitReached()) {
+            <strong>Límite de {{ catalogLimit }} productos alcanzado.</strong> Puedes editar los productos existentes.
+          } @else {
+            La carta admite hasta <strong>{{ catalogLimit }} productos</strong> entre todas las secciones, incluidos los agotados.
+          }
+        </p>
 
         <div class="workspace">
           <section class="catalog-panel" aria-labelledby="catalog-title">
@@ -92,7 +100,7 @@
                 <button type="button" [class.active]="filter() === 'entrada-adicional'" [attr.aria-pressed]="filter() === 'entrada-adicional'" (click)="selectFilter('entrada-adicional')">Entradas adicionales</button>
                 <button type="button" [class.active]="filter() === 'guarnicion'" [attr.aria-pressed]="filter() === 'guarnicion'" (click)="selectFilter('guarnicion')">Guarniciones</button>
               </nav>
-              <button class="create-button" type="button" [disabled]="!authenticated() || busy()" (click)="create()"><span aria-hidden="true">+</span> {{ filter() === 'entrada' ? 'Agregar entrada' : 'Agregar plato' }}</button>
+              <button class="create-button" type="button" [disabled]="!authenticated() || busy() || catalogLimitReached()" aria-describedby="catalog-capacity" (click)="create()"><span aria-hidden="true">+</span> {{ catalogLimitReached() ? 'Límite alcanzado' : filter() === 'entrada' ? 'Agregar entrada' : 'Agregar plato' }}</button>
               <label class="search-box"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.5"/><path d="m16 16 5 5"/></svg><span class="visually-hidden">Buscar platos</span><input type="search" placeholder="Buscar un plato…" [ngModel]="search()" (ngModelChange)="search.set($event)"></label>
             </div>
             <div class="item-list">
@@ -130,7 +138,7 @@
                     <p class="field-note daily-price-note">El precio del menú Económico y Ejecutivo se cambia en la tarjeta inferior.</p>
                   }
                   <label class="availability-switch"><input type="checkbox" name="dish-active" [(ngModel)]="dish.active"><span>Disponible en la carta</span></label>
-                  <button class="primary-button" type="submit" [disabled]="!authenticated() || busy()">{{ busy() ? 'Guardando…' : editorMode === 'create' ? 'Agregar a la carta' : 'Guardar cambios' }} <span aria-hidden="true">→</span></button>
+                  <button class="primary-button" type="submit" [disabled]="!authenticated() || busy() || (editorMode === 'create' && catalogLimitReached())">{{ busy() ? 'Guardando…' : editorMode === 'create' ? 'Agregar a la carta' : 'Guardar cambios' }} <span aria-hidden="true">→</span></button>
                   @if (!configured) { <p class="field-note">Conecta Neon para habilitar el guardado.</p> }
                 </form>
               </section>

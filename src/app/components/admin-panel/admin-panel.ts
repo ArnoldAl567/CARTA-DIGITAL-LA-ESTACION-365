@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { ADMIN_LOGIN } from '../../config/admin-login.config';
 import { CATEGORIES, DAILY_ADDON_CATEGORIES } from '../../data/menu.data';
 import { INITIAL_CATALOG } from '../../data/catalog-seed';
-import { CatalogItem, CatalogKind, DailyPrices, DEFAULT_DAILY_PRICES } from '../../models/catalog.models';
+import { CATALOG_LIMIT_MESSAGE, CatalogItem, CatalogKind, DailyPrices, DEFAULT_DAILY_PRICES, MAX_CATALOG_ITEMS } from '../../models/catalog.models';
 import { CatalogApiService } from '../../services/catalog-api.service';
 
 type CatalogFilter = 'todos' | CatalogKind | 'entrada-adicional' | 'guarnicion';
@@ -21,6 +21,8 @@ export class AdminPanel implements OnInit, OnDestroy {
   readonly authenticated = signal(false);
   readonly busy = signal(false);
   readonly rows = signal<CatalogItem[]>(INITIAL_CATALOG);
+  readonly catalogLimit = MAX_CATALOG_ITEMS;
+  readonly catalogLimitReached = computed(() => this.rows().length >= this.catalogLimit);
   readonly filter = signal<CatalogFilter>('carta');
   readonly search = signal('');
   readonly error = signal('');
@@ -168,6 +170,10 @@ export class AdminPanel implements OnInit, OnDestroy {
 
   create(): void {
     if (!this.authenticated() || this.busy()) return;
+    if (this.catalogLimitReached()) {
+      this.error.set(CATALOG_LIMIT_MESSAGE);
+      return;
+    }
     const selectedFilter = this.filter();
     const kind: CatalogKind = selectedFilter === 'todos' || selectedFilter === 'entrada-adicional' || selectedFilter === 'guarnicion' ? 'carta' : selectedFilter;
     const sourceId = `nuevo-${crypto.randomUUID()}`;
@@ -230,6 +236,10 @@ export class AdminPanel implements OnInit, OnDestroy {
 
   async saveItem(): Promise<void> {
     if (!this.editForm || !this.authenticated() || this.busy()) return;
+    if (this.editorMode === 'create' && this.catalogLimitReached()) {
+      this.error.set(CATALOG_LIMIT_MESSAGE);
+      return;
+    }
     const item = { ...this.editForm, name: this.editForm.name.trim() };
     if (!item.name) { this.error.set('Escribe el nombre del plato.'); return; }
     if (this.editorMode === 'create' && !this.selectedFile) {
@@ -259,7 +269,11 @@ export class AdminPanel implements OnInit, OnDestroy {
         : rows.map(row => row.item_key === saved.item_key ? saved : row));
       this.closeEditor();
       this.notice.set(creating ? 'Plato agregado y visible en la carta digital.' : 'Cambios guardados y visibles en la carta digital.');
-    } catch (error) { this.error.set(this.message(error)); }
+    } catch (error) {
+      const message = this.message(error);
+      if (message === CATALOG_LIMIT_MESSAGE) await this.loadCatalog();
+      this.error.set(message);
+    }
     finally { this.busy.set(false); }
   }
 
