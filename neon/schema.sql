@@ -1,6 +1,6 @@
 -- Ejecuta en Neon SQL Editor después de activar Data API y Neon Auth.
 -- Data API usa los roles anonymous/authenticated y la identidad auth.user_id().
--- Después ejecuta catalog-capacity.sql para aplicar el máximo de 150 productos.
+-- Después ejecuta catalog-capacity.sql para aplicar el máximo de 250 productos.
 
 create table if not exists public.catalog_admins (
   user_id text primary key,

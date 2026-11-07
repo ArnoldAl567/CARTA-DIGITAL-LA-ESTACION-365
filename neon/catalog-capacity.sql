@@ -6,13 +6,18 @@ lock table public.catalog_items in share row exclusive mode;
 
 create table if not exists public.catalog_capacity (
   singleton boolean primary key default true check (singleton),
-  item_count integer not null check (item_count between 0 and 150)
+  item_count integer not null
 );
+
+-- Actualiza también la restricción creada por instalaciones anteriores.
+alter table public.catalog_capacity
+  drop constraint if exists catalog_capacity_item_count_check,
+  add constraint catalog_capacity_item_count_check check (item_count between 0 and 250);
 
 alter table public.catalog_capacity enable row level security;
 revoke all on public.catalog_capacity from public, anonymous, authenticated;
 
--- Incluye todas las secciones y los productos agotados. Si ya hay más de 150,
+-- Incluye todas las secciones y los productos agotados. Si ya hay más de 250,
 -- la migración falla sin eliminar ni modificar productos.
 insert into public.catalog_capacity (singleton, item_count)
 select true, count(*)::integer from public.catalog_items
@@ -28,11 +33,11 @@ begin
   if tg_op = 'INSERT' then
     update public.catalog_capacity
     set item_count = item_count + 1
-    where singleton and item_count < 150;
+    where singleton and item_count < 250;
     if not found then
       raise exception using
         errcode = '23514',
-        message = 'La carta admite un máximo de 150 productos, incluidos los agotados. Puedes editar los productos existentes.';
+        message = 'La carta admite un máximo de 250 productos, incluidos los agotados. Puedes editar los productos existentes.';
     end if;
   elsif tg_op = 'DELETE' then
     update public.catalog_capacity set item_count = item_count - 1 where singleton;

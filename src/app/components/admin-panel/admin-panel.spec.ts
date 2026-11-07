@@ -85,7 +85,7 @@ describe('AdminPanel', () => {
     expect(panel.filteredRows().length).toBe(9);
   });
 
-  it('allows the 150th product and then blocks additions across every section, including inactive items', async () => {
+  it('allows the 250th product and then blocks additions across every section, including inactive items', async () => {
     const panel = fixture.componentInstance;
     panel.rows.set(catalogWith(MAX_CATALOG_ITEMS - 1));
     panel.selectFilter('entrada');
@@ -103,7 +103,7 @@ describe('AdminPanel', () => {
       expect(panel.editForm).toBeNull();
     }
     expect(api.createItem).toHaveBeenCalledTimes(1);
-    expect(fixture.nativeElement.querySelector('.catalog-capacity').textContent).toContain('150 productos alcanzado');
+    expect(fixture.nativeElement.querySelector('.catalog-capacity').textContent).toContain(MAX_CATALOG_ITEMS + ' productos alcanzado');
   });
 
   it('does not upload a photo if the catalog reaches capacity while a new product is being edited', async () => {
@@ -117,7 +117,7 @@ describe('AdminPanel', () => {
     await panel.saveItem();
     expect(api.uploadImage).not.toHaveBeenCalled();
     expect(api.createItem).not.toHaveBeenCalled();
-    expect(panel.error()).toContain('máximo de 150');
+    expect(panel.error()).toBe(CATALOG_LIMIT_MESSAGE);
   });
 
   it('continues to allow edits and availability changes at full capacity', async () => {

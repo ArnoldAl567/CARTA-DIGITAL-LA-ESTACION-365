@@ -1,7 +1,7 @@
 export type CatalogKind = 'carta' | 'fondo' | 'entrada';
 
-export const MAX_CATALOG_ITEMS = 150;
-export const CATALOG_LIMIT_MESSAGE = 'La carta admite un máximo de 150 productos, incluidos los agotados. Puedes editar los productos existentes.';
+export const MAX_CATALOG_ITEMS = 250;
+export const CATALOG_LIMIT_MESSAGE = `La carta admite un máximo de ${MAX_CATALOG_ITEMS} productos, incluidos los agotados. Puedes editar los productos existentes.`;
 
 export interface CatalogItem {
   item_key: string;
